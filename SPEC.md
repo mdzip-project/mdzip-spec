@@ -23,6 +23,7 @@
 13. [Security Considerations](#13-security-considerations)
 14. [Conformance](#14-conformance)
 15. [Examples](#15-examples)
+16. [Implementation Guidance (Non-Normative)](#16-implementation-guidance-non-normative)
 
 ---
 
@@ -469,6 +470,61 @@ Here is a screenshot of the interface:
 
 ![Screenshot](assets/images/screenshot.png)
 ```
+
+---
+
+## 16. Implementation Guidance (Non-Normative)
+
+This section is non-normative and is intended to help tool authors and AI-assisted coding agents implement this specification consistently.
+
+### 16.1 Producer Build Checklist
+
+When creating a `.mdz` archive, a producer can follow this sequence:
+
+1. Collect source Markdown and assets in a staging tree.
+2. Normalize text encoding to UTF-8 for Markdown and JSON files.
+3. Normalize text line endings to LF (`\n`) where practical.
+4. Validate file paths against [Section 5.4](#54-path-constraints).
+5. If `manifest.json` is present:
+   - verify required manifest fields (`mdz`, `title`);
+   - verify `entryPoint`, if present, exists in the archive;
+   - preserve unknown fields as-is when round-tripping.
+6. Ensure at least one unambiguous entry point condition from [Section 5.5](#55-entry-point-discovery) is satisfied.
+7. Create an unencrypted ZIP archive and use `.mdz` extension.
+
+### 16.2 Consumer Load Checklist
+
+When opening a `.mdz` archive, a consumer can follow this sequence:
+
+1. Open archive as ZIP and reject encrypted/password-protected entries.
+2. Enumerate entries and validate path safety constraints ([Section 5.4](#54-path-constraints)).
+3. Parse `manifest.json` if present, ignoring unknown fields.
+4. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
+5. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
+6. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
+7. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
+
+### 16.3 Suggested Error Categories
+
+Implementations may expose stable error categories to simplify debugging and cross-tool behavior comparisons:
+
+- `ERR_ZIP_INVALID`: archive is not a valid ZIP container.
+- `ERR_ZIP_ENCRYPTED`: archive or entries use unsupported encryption.
+- `ERR_PATH_INVALID`: one or more entry paths violate [Section 5.4](#54-path-constraints).
+- `ERR_MANIFEST_INVALID`: `manifest.json` is malformed or missing required fields when present.
+- `ERR_ENTRYPOINT_UNRESOLVED`: no unambiguous primary Markdown file can be determined.
+- `ERR_ENTRYPOINT_MISSING`: `entryPoint` references a file not present in archive.
+- `ERR_VERSION_UNSUPPORTED`: manifest `mdz` major version is not supported.
+
+### 16.4 AI Agent Prompting Tips
+
+To improve deterministic implementation quality, AI prompts should explicitly include:
+
+- the exact target spec version (`1.0.0-draft` or later);
+- whether producer, consumer, or both are being implemented;
+- required conformance scope (minimum MUSTs vs. SHOULDs included);
+- required behavior for ambiguous entry points;
+- explicit test expectations from [`tests/README.md`](tests/README.md).
 
 ---
 
