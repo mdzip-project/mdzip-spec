@@ -19,8 +19,10 @@
 9. [Linking and References](#9-linking-and-references)
 10. [MIME Type and File Extension](#10-mime-type-and-file-extension)
 11. [Versioning](#11-versioning)
-12. [Conformance](#12-conformance)
-13. [Examples](#13-examples)
+12. [Compatibility Notes](#12-compatibility-notes)
+13. [Security Considerations](#13-security-considerations)
+14. [Conformance](#14-conformance)
+15. [Examples](#15-examples)
 
 ---
 
@@ -29,6 +31,8 @@
 The **Markdown Zip** format (`.mdz`) is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets—such as images, stylesheets, and other referenced resources—into a single ZIP archive.
 
 A `.mdz` file allows authors to distribute complete Markdown-based documents without broken asset references, and enables readers and tools to reliably open and render the document without external dependencies.
+
+This specification follows established standards patterns by using RFC 2119 normative language, Semantic Versioning, and UTF-8/JSON conventions compatible with other open document and text-based standards (such as CommonMark, EPUB, and TOML ecosystems).
 
 ---
 
@@ -47,6 +51,7 @@ A `.mdz` file allows authors to distribute complete Markdown-based documents wit
 - This specification does not mandate a specific Markdown dialect or rendering engine.
 - This specification does not define Digital Rights Management (DRM) or encryption.
 - This specification does not define a network transport protocol.
+- This specification does not define ordered navigation, pagination, or table-of-contents structure for multi-page documents. Linking between pages is left to the document author using standard Markdown relative links.
 
 ---
 
@@ -58,7 +63,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 |------|-----------|
 | **Archive** | The `.mdz` file itself; a ZIP-format container. |
 | **Entry point** | The primary Markdown file a reader or tool opens first. |
-| **Manifest** | The `manifest.json` file at the root of the archive describing the document. |
+| **Manifest** | The optional `manifest.json` file at the root of the archive describing document metadata and entry-point overrides. |
 | **Asset** | Any non-Markdown file referenced by a Markdown content file (e.g., images, stylesheets). |
 | **Conforming producer** | Software that creates `.mdz` files according to this specification. |
 | **Conforming consumer** | Software that reads and renders `.mdz` files according to this specification. |
@@ -77,26 +82,36 @@ Requirements:
 - File path separators inside the archive **MUST** be forward slashes (`/`).
 - The archive **MAY** use DEFLATE compression (method 8) or store without compression (method 0) for individual entries.
 - The archive **MUST NOT** use password protection or encryption.
+- Conforming producers **SHOULD** write LF (`\n`) line endings for all text files within the archive (including Markdown, JSON, and plain-text assets).
+- Conforming consumers **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
+- Conforming producers **SHOULD** normalize line endings to LF when writing `.mdz` files, even if source content originated from platforms that use other line-ending conventions.
 
 ---
 
 ## 5. Archive Structure
 
-The archive **MUST** contain a `manifest.json` file at the root level. All other files are organized relative to the archive root.
+The archive root **MUST** contain `index.md`. A `manifest.json` file at the archive root is OPTIONAL. All other files are organized relative to the archive root.
+
+`index.md` serves as the **fallback entry point** for consumers that do not support `manifest.json`. It **MUST** always be present regardless of whether a manifest `entryPoint` override is defined.
 
 ### 5.1 Required Files
 
 | Path | Description |
 |------|-------------|
-| `manifest.json` | Document manifest (see [Section 6](#6-manifest-file)). |
-| *(entry point)* | The Markdown file identified as the entry point in the manifest. |
+| `index.md` | Fallback entry point Markdown file. Always required. |
 
-### 5.2 Recommended Layout
+### 5.2 Optional Files
+
+| Path | Description |
+|------|-------------|
+| `manifest.json` | Optional document manifest (see [Section 6](#6-manifest-file)). |
+
+### 5.3 Recommended Layout
 
 ```
 document.mdz (ZIP archive)
-├── manifest.json          # Required: document manifest
-├── index.md               # Entry point Markdown file (name configurable)
+├── index.md               # Required: default entry point Markdown file
+├── manifest.json          # Optional: metadata and entry-point override
 ├── chapter-01.md          # Additional Markdown files (optional)
 ├── chapter-02.md
 └── assets/                # Recommended directory for non-Markdown files
@@ -107,18 +122,33 @@ document.mdz (ZIP archive)
         └── style.css
 ```
 
-### 5.3 Path Constraints
+### 5.4 Path Constraints
 
 - All file paths inside the archive **MUST** be relative to the archive root.
 - File paths **MUST NOT** begin with a leading slash (`/`).
 - File paths **MUST NOT** contain path traversal sequences (e.g., `../`).
+- File paths **MUST NOT** contain null bytes or ASCII control characters (U+0000–U+001F, U+007F).
+- File paths **MUST NOT** contain characters reserved by common operating systems: `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`.
 - File paths **SHOULD** use lowercase characters.
+
+### 5.5 Fallback Behavior of `index.md`
+
+When `manifest.json` is present and `entryPoint` refers to a file other than `index.md`, conforming producers **SHOULD** ensure `index.md` contains a human-readable reference or link to the actual entry-point document. This allows consumers that do not support `manifest.json` to still present meaningful content to users.
+
+**Example `index.md` stub:**
+```markdown
+# My Document
+
+This document requires an MDZ-compatible reader for the best experience.
+
+→ [Continue to the document](chapters/intro.md)
+```
 
 ---
 
 ## 6. Manifest File
 
-The manifest file **MUST** be named `manifest.json` and placed at the root of the archive. It **MUST** be a valid [JSON](https://www.rfc-editor.org/rfc/rfc8259) document encoded in UTF-8.
+The manifest file, when present, **MUST** be named `manifest.json` and placed at the root of the archive. It **MUST** be a valid [JSON](https://www.rfc-editor.org/rfc/rfc8259) document encoded in UTF-8.
 
 ### 6.1 Schema
 
@@ -144,13 +174,15 @@ The manifest file **MUST** be named `manifest.json` and placed at the root of th
 }
 ```
 
+> **Required fields** (when manifest is present): `mdz`, `title`. All other fields are OPTIONAL.
+
 ### 6.2 Field Definitions
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mdz` | string | **REQUIRED** | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.0"`). |
-| `title` | string | **REQUIRED** | The human-readable title of the document. **MUST NOT** be empty. |
-| `entryPoint` | string | **REQUIRED** | Archive-root-relative path to the primary Markdown file (e.g., `"index.md"`). The referenced file **MUST** exist in the archive. |
+| `mdz` | string | **REQUIRED (if manifest is present)** | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.0"`). |
+| `title` | string | **REQUIRED (if manifest is present)** | The human-readable title of the document. **MUST NOT** be empty. |
+| `entryPoint` | string | OPTIONAL | Archive-root-relative path to the primary Markdown file (e.g., `"chapters/start.md"`). The referenced file **MUST** exist in the archive. If omitted, consumers **MUST** use `index.md`. |
 | `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
 | `authors` | array | OPTIONAL | An array of author objects. Each object **MAY** include `name` (string) and `email` (string) fields. |
 | `description` | string | OPTIONAL | A short plain-text description of the document. |
@@ -207,7 +239,7 @@ Markdown files **SHOULD** use the `.md` file extension. The `.markdown` extensio
 
 ### 7.4 Multiple Pages
 
-A `.mdz` archive **MAY** contain multiple Markdown files, allowing a document to be split across chapters, sections, or pages. When multiple Markdown files are present, the file identified by `entryPoint` in the manifest is the primary document. Other Markdown files **SHOULD** be linked from the entry point or from other Markdown files within the archive using relative paths.
+A `.mdz` archive **MAY** contain multiple Markdown files, allowing a document to be split across chapters, sections, or pages. The primary document is `index.md` by default, or the file identified by `entryPoint` when a manifest is present and specifies it. Other Markdown files **SHOULD** be linked from the primary document or from other Markdown files within the archive using relative paths.
 
 ---
 
@@ -264,6 +296,8 @@ Conforming consumers **MUST** resolve relative paths against the path of the ref
 
 Producers and consumers **SHOULD** use the `.mdz` file extension. The MIME type `application/vnd.markdownzip` **SHOULD** be used when the format is transmitted over HTTP or identified in metadata.
 
+`application/vnd.markdownzip` is currently an unregistered vendor media type in this draft. Until formal registration is completed, implementations **MAY** treat it as provisional for interoperability testing.
+
 ---
 
 ## 11. Versioning
@@ -278,61 +312,116 @@ This specification uses [Semantic Versioning 2.0.0](https://semver.org/):
 
 ### 11.2 Manifest `mdz` Field
 
-The `mdz` field in `manifest.json` identifies the version of this specification that the producing tool targeted. Conforming consumers:
+When `manifest.json` is present, the `mdz` field identifies the version of this specification that the producing tool targeted. Conforming consumers:
 
 - **MUST** reject files where the `mdz` field major version is higher than the highest major version the consumer supports.
 - **SHOULD** warn users when the `mdz` field major version is lower than the consumer's current major version support.
 - **MUST** accept files where the `mdz` field minor or patch version differs from the consumer's supported version, provided the major version matches.
 
+### 11.3 Files Without `manifest.json`
+
+When `manifest.json` is omitted, the archive is unversioned. Conforming consumers:
+
+- **MUST** treat the archive as compatible with baseline 1.x behavior defined by this specification.
+- **MUST NOT** reject the archive solely due to missing version metadata.
+- **SHOULD** expose that version metadata is unavailable when presenting document details to users.
+
 ---
 
-## 12. Conformance
+## 12. Compatibility Notes
 
-### 12.1 Conforming Producer
+This section summarizes expected behavior that improves interoperability across tools, platforms, and Markdown ecosystems.
+
+### 12.1 Baseline Interoperability
+
+- Conforming consumers **MUST** support archives that omit `manifest.json` and use `index.md` as the primary document.
+- Conforming consumers **MUST** support UTF-8 encoded Markdown and JSON files.
+- Conforming consumers **MUST** support relative path resolution semantics defined in [Section 9](#9-linking-and-references).
+
+### 12.2 Line Endings
+
+- Conforming producers **SHOULD** normalize text files to LF (`\n`) line endings when writing `.mdz`.
+- Conforming consumers **MUST** accept text files using LF (`\n`) and CRLF (`\r\n`) line endings.
+
+### 12.3 Path and Case Behavior
+
+- Paths inside archives **MUST** use forward slashes (`/`), regardless of host platform.
+- Consumers **SHOULD** treat archive paths as case-sensitive for deterministic behavior across operating systems.
+- Unknown manifest fields **MUST** be ignored to preserve forward compatibility.
+
+### 12.4 Markdown Dialect Portability
+
+- Producers **SHOULD** prefer portable Markdown constructs that degrade gracefully in CommonMark-class renderers.
+- Producers **SHOULD** document non-portable syntax expectations when relying on dialect-specific features.
+
+---
+
+## 13. Security Considerations
+
+Conforming consumers and producers should treat `.mdz` content as potentially untrusted input. The following controls are recommended to reduce risk.
+
+### 13.1 Archive Handling
+
+- Consumers **MUST** reject path traversal attempts that resolve outside archive root (e.g., `../`, absolute paths).
+- Consumers **MUST** reject or sanitize archive entries whose paths contain characters prohibited by Section 5.4 (null bytes, control characters, or OS-reserved characters) before writing to the local filesystem.
+- Consumers **SHOULD** enforce limits on extracted entry count, total uncompressed bytes, and compression ratio to mitigate ZIP bomb attacks.
+- Consumers **SHOULD** ignore or safely handle symbolic links and hard links if exposed by the ZIP library.
+
+### 13.2 Content Handling
+
+- Consumers **MUST NOT** execute scripts or binaries from `.mdz` content as part of normal rendering.
+- Consumers **SHOULD** warn before opening external URLs found in document links.
+- Consumers **SHOULD** apply implementation-specific size/time limits while parsing large Markdown or metadata files.
+
+### 13.3 Producer Guidance
+
+- Producers **SHOULD NOT** include credentials, private keys, or other secrets in archive content.
+- Producers **SHOULD** include only assets required for rendering the document.
+
+---
+
+## 14. Conformance
+
+### 14.1 Conforming Producer
 
 A conforming producer is any software that creates `.mdz` files. A conforming producer:
 
 1. **MUST** produce a valid ZIP archive as defined in [Section 4](#4-file-format).
-2. **MUST** include a `manifest.json` at the archive root containing all **REQUIRED** fields as defined in [Section 6](#6-manifest-file).
-3. **MUST** include the file referenced by `entryPoint` in the archive.
-4. **MUST** use UTF-8 encoding for all Markdown and JSON files.
-5. **MUST** use forward-slash path separators in the archive.
-6. **MUST NOT** include path traversal sequences in any file path.
-7. **SHOULD** include all assets referenced by the document's Markdown content.
+2. **MUST** include `index.md` at the archive root.
+3. **MUST** include the file referenced by `entryPoint` when a manifest is present and defines `entryPoint`.
+4. **SHOULD** ensure `index.md` contains a human-readable reference or link to the actual entry-point document when `entryPoint` refers to a file other than `index.md` (see [Section 5.5](#55-fallback-behavior-of-indexmd)).
+5. **MUST** use UTF-8 encoding for all Markdown and JSON files.
+6. **SHOULD** write LF (`\n`) line endings for all text files in the archive.
+7. **MUST** use forward-slash path separators in the archive.
+8. **MUST NOT** include path traversal sequences in any file path.
+9. **MUST NOT** include null bytes, ASCII control characters, or OS-reserved characters (`\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`) in any file path.
+10. **SHOULD** include all assets referenced by the document's Markdown content.
 
-### 12.2 Conforming Consumer
+### 14.2 Conforming Consumer
 
 A conforming consumer is any software that reads and/or renders `.mdz` files. A conforming consumer:
 
 1. **MUST** be able to open and extract a valid ZIP archive.
-2. **MUST** parse the `manifest.json` file and use the `entryPoint` field to identify the primary Markdown file.
-3. **MUST** ignore unrecognized fields in `manifest.json`.
-4. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
-5. **MUST** reject or safely handle any path that traverses outside the archive root.
-6. **MUST** reject files where the manifest `mdz` major version exceeds the consumer's supported major version.
+2. **MUST** use `index.md` as the primary Markdown file when no manifest is present.
+3. **MUST** parse `manifest.json` when present and use `entryPoint` as the primary Markdown file when defined.
+4. **MUST** ignore unrecognized fields in `manifest.json`.
+5. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
+6. **MUST** reject or safely handle any path that traverses outside the archive root.
+7. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
+8. **MUST** reject files where the manifest `mdz` major version exceeds the consumer's supported major version, when a manifest is present.
 
 ---
 
-## 13. Examples
+## 15. Examples
 
-### 13.1 Minimal `.mdz` Archive
+### 15.1 Minimal `.mdz` Archive
 
-A valid minimal `.mdz` archive contains only `manifest.json` and one Markdown file:
+A valid minimal `.mdz` archive contains only `index.md`:
 
 **Archive contents:**
 ```
 hello.mdz
-├── manifest.json
 └── index.md
-```
-
-**`manifest.json`:**
-```json
-{
-  "mdz": "1.0.0",
-  "title": "Hello World",
-  "entryPoint": "index.md"
-}
 ```
 
 **`index.md`:**
@@ -344,7 +433,7 @@ This is a minimal Markdown Zip document.
 
 ---
 
-### 13.2 Document with Assets
+### 15.2 Document with Assets
 
 **Archive contents:**
 ```
