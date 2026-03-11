@@ -103,6 +103,7 @@ There are no unconditionally required files beyond the archive being a valid ZIP
 |------|-------------|
 | `index.md` | Conventional entry point Markdown file (see [Section 5.5](#55-entry-point-discovery)). |
 | `manifest.json` | Optional document manifest (see [Section 6](#6-manifest-file)). |
+| `README.md` | Optional human-facing guidance for environments without full `.mdz` tooling. |
 
 ### 5.3 Recommended Layout
 
@@ -110,6 +111,7 @@ There are no unconditionally required files beyond the archive being a valid ZIP
 document.mdz (ZIP archive)
 ├── index.md               # Recommended: conventional entry point
 ├── manifest.json          # Optional: metadata and entry-point override
+├── README.md              # Optional: human-facing usage notes
 ├── chapter-01.md          # Additional Markdown files (optional)
 ├── chapter-02.md
 └── assets/                # Recommended directory for non-Markdown files
@@ -140,11 +142,34 @@ Conforming consumers **MUST** determine the primary Markdown file using the foll
 
 Conforming producers **SHOULD** ensure their archives satisfy one of the first three conditions to guarantee unambiguous entry point resolution across all consumers. Including `index.md` at the archive root or providing a `manifest.json` with `entryPoint` defined are the most interoperable approaches.
 
+### 5.6 Human-Facing `README.md` (Optional)
+
+Producers **SHOULD** include a root-level `README.md` when practical, especially for files likely to be opened by recipients without `.mdz`-aware tooling.
+
+Because `README.md` is inside the archive, producers distributing `.mdz` to likely unaware recipients **SHOULD** provide a primary discovery method outside the archive. Examples include:
+
+- a download-page note describing `.mdz` and basic opening steps,
+- a companion sidecar text file next to the `.mdz` file,
+- a website/help link shown wherever the file is shared.
+
+When present, `README.md` **SHOULD** briefly include:
+
+- what the archive is (`.mdz` / Markdown Zip),
+- where primary document content begins (for example, `index.md`),
+- how to open the package with standard tools (for example, unzip then open Markdown files),
+- where to find format documentation (for example, a project URL).
+
+Producers **MAY** include instructions for opening the package with a specific consumer tool. When they do, they **SHOULD** also include a generic fallback workflow (for example, unzip and open `index.md`) so the package remains understandable without that specific tool.
+
+`README.md` is a secondary aid and does not replace out-of-archive discovery guidance for unaware recipients. It is informational only and does not affect entry point discovery or conformance logic.
+
 ---
 
 ## 6. Manifest File
 
 The manifest file, when present, **MUST** be named `manifest.json` and placed at the root of the archive. It **MUST** be a valid [JSON](https://www.rfc-editor.org/rfc/rfc8259) document encoded in UTF-8.
+
+Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as a local convenience, but conforming `.mdz` archives **MUST** contain `manifest.json` serialized as standard JSON per RFC 8259.
 
 ### 6.1 Schema
 
