@@ -1,6 +1,6 @@
-# Markdown Zip Specification
+# MarkdownZip Specification
 
-Specification for the **Markdown Zip** (`.mdz`) file format.
+Specification for the **MarkdownZip** (`.mdz`) file format.
 
 Current draft release: `v1.0.0-draft` (dated `2026-03-08`).
 
@@ -8,7 +8,7 @@ This repository defines the `.mdz` file format specification; it does not provid
 
 ## What is .mdz?
 
-A `.mdz` file is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets (images, stylesheets, etc.) into a single ZIP archive.
+An `.mdz` file is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets (images, stylesheets, etc.) into a single ZIP archive.
 
 ## Specification
 
@@ -44,7 +44,7 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    ```markdown
    # My Document
 
-   Hello from Markdown Zip!
+   Hello from MarkdownZip!
    ```
 
 2. *(Optional)* **`manifest.json`** for metadata and entry-point override:

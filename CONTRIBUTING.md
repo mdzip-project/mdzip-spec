@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve the Markdown Zip (`.mdz`) specification.
+Thanks for helping improve the MarkdownZip (`.mdz`) specification.
 
 ## Scope
 

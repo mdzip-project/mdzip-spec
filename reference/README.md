@@ -98,7 +98,7 @@ The spec restricts the intersection that causes cross-platform failures. Forward
 
 ## Why a dedicated consumer is required for correct asset rendering
 
-A `.mdz` file is only fully portable when opened by a tool that understands it is operating inside an archive. This is most visible with assets such as images.
+An `.mdz` file is only fully portable when opened by a tool that understands it is operating inside an archive. This is most visible with assets such as images.
 
 When a Markdown file inside an archive references an image with a relative path — e.g., `![Diagram](assets/images/diagram.svg)` — a conforming consumer resolves that path within the archive's virtual filesystem, finds the entry, and serves it inline during rendering. The image displays correctly.
 

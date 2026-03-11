@@ -1,4 +1,4 @@
-# Markdown Zip (.mdz) File Format Specification
+# MarkdownZip (.mdz) File Format Specification
 
 **Version:** 1.0.0-draft  
 **Status:** Draft  
@@ -24,14 +24,15 @@
 14. [Conformance](#14-conformance)
 15. [Examples](#15-examples)
 16. [Implementation Guidance (Non-Normative)](#16-implementation-guidance-non-normative)
+17. [Future Extensions (Non-Normative)](#17-future-extensions-non-normative)
 
 ---
 
 ## 1. Overview
 
-The **Markdown Zip** format (`.mdz`) is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets—such as images, stylesheets, and other referenced resources—into a single ZIP archive.
+The **MarkdownZip** format (`.mdz`) is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets—such as images, stylesheets, and other referenced resources—into a single ZIP archive.
 
-A `.mdz` file allows authors to distribute complete Markdown-based documents without broken asset references, and enables readers and tools to reliably open and render the document without external dependencies.
+An `.mdz` file allows authors to distribute complete Markdown-based documents without broken asset references, and enables readers and tools to reliably open and render the document without external dependencies.
 
 This specification follows established standards patterns by using RFC 2119 normative language, Semantic Versioning, and UTF-8/JSON conventions compatible with other open document and text-based standards (such as CommonMark, EPUB, and TOML ecosystems).
 
@@ -73,7 +74,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ## 4. File Format
 
-A `.mdz` file is a **ZIP archive** as defined by the [ZIP Application Note (APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) version 6.3.10 or later.
+An `.mdz` file is a **ZIP archive** as defined by the [ZIP Application Note (APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) version 6.3.10 or later.
 
 Requirements:
 
@@ -91,7 +92,7 @@ Requirements:
 
 ## 5. Archive Structure
 
-A `.mdz` file is a ZIP archive containing at least one Markdown file that can be resolved as the primary document using the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). A `manifest.json` file at the archive root is OPTIONAL. All other files are organized relative to the archive root.
+An `.mdz` file is a ZIP archive containing at least one Markdown file that can be resolved as the primary document using the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). A `manifest.json` file at the archive root is OPTIONAL. All other files are organized relative to the archive root.
 
 ### 5.1 Required Files
 
@@ -140,7 +141,7 @@ Conforming consumers **MUST** determine the primary Markdown file using the foll
 3. If exactly one `.md` or `.markdown` file exists at the archive root, use it.
 4. Otherwise, the consumer **MUST NOT** silently select a file arbitrarily. The consumer **SHOULD** present the user with a list of available Markdown files to choose from, or report a clear error indicating that no unambiguous entry point could be determined.
 
-Conforming producers **SHOULD** ensure their archives satisfy one of the first three conditions to guarantee unambiguous entry point resolution across all consumers. Including `index.md` at the archive root or providing a `manifest.json` with `entryPoint` defined are the most interoperable approaches.
+Conforming producers **MUST** ensure their archives satisfy at least one of the first three conditions to guarantee unambiguous entry point resolution across all consumers. Including `index.md` at the archive root or providing a `manifest.json` with `entryPoint` defined are the most interoperable approaches.
 
 ### 5.6 Human-Facing `README.md` (Optional)
 
@@ -154,7 +155,7 @@ Because `README.md` is inside the archive, producers distributing `.mdz` to like
 
 When present, `README.md` **SHOULD** briefly include:
 
-- what the archive is (`.mdz` / Markdown Zip),
+- what the archive is (`.mdz` / MarkdownZip),
 - where primary document content begins (for example, `index.md`),
 - how to open the package with standard tools (for example, unzip then open Markdown files),
 - where to find format documentation (for example, a project URL).
@@ -260,7 +261,7 @@ Markdown files **SHOULD** use the `.md` file extension. The `.markdown` extensio
 
 ### 7.4 Multiple Pages
 
-A `.mdz` archive **MAY** contain multiple Markdown files, allowing a document to be split across chapters, sections, or pages. The primary document is `index.md` by default, or the file identified by `entryPoint` when a manifest is present and specifies it. Other Markdown files **SHOULD** be linked from the primary document or from other Markdown files within the archive using relative paths.
+An `.mdz` archive **MAY** contain multiple Markdown files, allowing a document to be split across chapters, sections, or pages. The primary document is `index.md` by default, or the file identified by `entryPoint` when a manifest is present and specifies it. Other Markdown files **SHOULD** be linked from the primary document or from other Markdown files within the archive using relative paths.
 
 ---
 
@@ -449,7 +450,7 @@ hello.mdz
 ```markdown
 # Hello World
 
-This is a minimal Markdown Zip document.
+This is a minimal MarkdownZip document.
 ```
 
 ---
@@ -550,6 +551,88 @@ To improve deterministic implementation quality, AI prompts should explicitly in
 - required conformance scope (minimum MUSTs vs. SHOULDs included);
 - required behavior for ambiguous entry points;
 - explicit test expectations from [`tests/README.md`](tests/README.md).
+
+---
+
+## 17. Future Extensions (Non-Normative)
+
+This section records possible future directions and does not define current conformance requirements for `1.0.0-draft`.
+
+### 17.1 Manifest-Level Document Collections
+
+A future version may define an optional manifest field (for example, `documents`) to describe multi-file documents with per-file metadata.
+
+Potential use cases:
+
+- explicit reading/navigation order,
+- per-file title/author metadata,
+- chapter-level metadata for richer consumers.
+
+One possible shape:
+
+```json
+{
+  "documents": [
+    {
+      "path": "chapter-01.md",
+      "title": "Introduction",
+      "order": 1,
+      "authors": ["Jane Smith"]
+    }
+  ]
+}
+```
+
+If introduced, future revisions should define:
+
+- interaction with `entryPoint`,
+- behavior when listed files are missing or duplicated,
+- ordering semantics and tie-breaking rules,
+- backward compatibility for consumers that ignore unrecognized fields.
+
+### 17.2 Reader Resume State (Last Read Position)
+
+A future ecosystem convention may define how consumers remember a reader's last opened file and position for an `.mdz` document.
+
+For interoperability and conflict avoidance, this state is best treated as consumer-local user state, not archive content. Implementations should prefer:
+
+- local storage keyed by document identity (for example, path plus content hash),
+- per-user state separation,
+- non-destructive behavior for read-only archives.
+
+Embedding "last read" data directly inside `.mdz` is not part of this draft and should be avoided unless a future version defines explicit multi-writer and conflict-resolution semantics.
+
+### 17.3 Bookmarks
+
+A future ecosystem convention may define bookmark support so readers can save and return to notable locations within MarkdownZip documents.
+
+As with resume state, bookmark data is best treated as consumer-local user state by default. Implementations should prefer:
+
+- local per-user bookmark storage keyed by document identity,
+- bookmark targets that can survive minor content edits where possible,
+- non-destructive behavior for read-only archives.
+
+Embedding bookmark data directly inside `.mdz` is not part of this draft and should be avoided unless a future version defines portable bookmark anchoring and conflict-resolution semantics.
+
+### 17.4 Extension Design Principles
+
+Future extensions should:
+
+- preserve portability and minimal baseline interoperability,
+- remain optional unless a clear interoperability need requires otherwise,
+- avoid coupling the format to any single editor or rendering engine,
+- include conformance tests and examples before becoming normative.
+
+### 17.5 Proposal Process
+
+Contributors proposing extensions should open an issue and include:
+
+- problem statement and user impact,
+- normative wording draft,
+- compatibility analysis,
+- proposed conformance tests.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for repository workflow.
 
 ---
 
