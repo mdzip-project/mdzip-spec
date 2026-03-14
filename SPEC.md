@@ -196,14 +196,14 @@ Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as 
 }
 ```
 
-> **Required fields** (when manifest is present): `mdz`, `title`. All other fields are OPTIONAL.
+> **Required fields** (when manifest is present): `mdz`. All other fields are OPTIONAL.
 
 ### 6.2 Field Definitions
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `mdz` | string | **REQUIRED (if manifest is present)** | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.0"`). |
-| `title` | string | **REQUIRED (if manifest is present)** | The human-readable title of the document. **MUST NOT** be empty. |
+| `title` | string | OPTIONAL | The human-readable title of the document. If present, it **MUST NOT** be empty. If omitted, consumers **SHOULD** derive a display title from available context (for example, the entry-point, filename or first heading). |
 | `entryPoint` | string | OPTIONAL | Path to the primary Markdown file, relative to the archive root (e.g., `"chapters/start.md"`). The referenced file **MUST** exist in the archive. If omitted, consumers apply the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). |
 | `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
 | `authors` | array | OPTIONAL | An array of author objects. Each object **MAY** include `name` (string) and `email` (string) fields. |
@@ -213,7 +213,7 @@ Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as 
 | `modified` | string | OPTIONAL | The last-modified datetime of the document in ISO 8601 format. |
 | `license` | string | OPTIONAL | An [SPDX license identifier](https://spdx.org/licenses/) (e.g., `"MIT"`, `"CC-BY-4.0"`) or a URL pointing to the license text. |
 | `keywords` | array of strings | OPTIONAL | A list of keywords or tags describing the document. |
-| `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"assets/images/cover.png"`). The referenced file **MUST** exist in the archive if specified. |
+| `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"assets/images/cover.png"`). If present, it **MUST** reference an existing file in the archive. If `cover` is present but the referenced file is missing, conforming consumers **SHOULD** ignore `cover` and continue processing the archive; they **MAY** emit a warning. |
 
 ### 6.3 Additional Fields
 
@@ -427,10 +427,11 @@ A conforming consumer is any software that reads and/or renders `.mdz` files. A 
 2. **MUST** determine the primary Markdown file using the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery).
 3. **MUST NOT** silently select a Markdown file arbitrarily when no unambiguous entry point can be determined. The consumer **SHOULD** present the user with a list of available Markdown files or report a clear error.
 4. **MUST** parse `manifest.json` when present and ignore unrecognized fields.
-5. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
-6. **MUST** reject or safely handle any path that traverses outside the archive root.
-7. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
-8. **MUST** reject files where the manifest `mdz` major version exceeds the consumer's supported major version, when a manifest is present.
+5. If manifest `cover` is present but references a missing file, **SHOULD** ignore `cover` and continue processing the archive; **MAY** emit a warning.
+6. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
+7. **MUST** reject or safely handle any path that traverses outside the archive root.
+8. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
+9. **MUST** reject files where the manifest `mdz` major version exceeds the consumer's supported major version, when a manifest is present.
 
 ---
 
@@ -512,7 +513,7 @@ When creating a `.mdz` archive, a producer can follow this sequence:
 3. Normalize text line endings to LF (`\n`) where practical.
 4. Validate file paths against [Section 5.4](#54-path-constraints).
 5. If `manifest.json` is present:
-   - verify required manifest fields (`mdz`, `title`);
+   - verify required manifest fields (`mdz`);
    - verify `entryPoint`, if present, exists in the archive;
    - preserve unknown fields as-is when round-tripping.
 6. Ensure at least one unambiguous entry point condition from [Section 5.5](#55-entry-point-discovery) is satisfied.
@@ -525,10 +526,11 @@ When opening a `.mdz` archive, a consumer can follow this sequence:
 1. Open archive as ZIP and reject encrypted/password-protected entries.
 2. Enumerate entries and validate path safety constraints ([Section 5.4](#54-path-constraints)).
 3. Parse `manifest.json` if present, ignoring unknown fields.
-4. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
-5. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
-6. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
-7. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
+4. If manifest `cover` is present and references a missing file, ignore `cover` and optionally warn.
+5. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
+6. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
+7. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
+8. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
 
 ### 16.3 Suggested Error Categories
 
