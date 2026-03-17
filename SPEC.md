@@ -1,8 +1,8 @@
 # MarkdownZip (.mdz) File Format Specification
 
-**Version:** 1.0.0-draft  
+**Version:** 1.0.1-draft  
 **Status:** Draft  
-**Date:** 2026-03-08
+**Date:** 2026-03-16
 
 ---
 
@@ -176,41 +176,87 @@ Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as 
 
 ```json
 {
-  "mdz": "<spec version>",
+  "spec": {
+    "name": "markdownzip-spec",
+    "version": "<spec version>"
+  },
+  "producer": {
+    "application": {
+      "name": "<application/tool name>",
+      "version": "<application version>",
+      "url": "<application URL>"
+    },
+    "core": {
+      "name": "<core library/runtime name>",
+      "version": "<core library/runtime version>",
+      "url": "<core library/runtime URL>"
+    }
+  },
+  "author": {
+    "name": "<author name>",
+    "email": "<author email>",
+    "url": "<author URL>"
+  },
   "title": "<document title>",
   "entryPoint": "<path to entry point markdown file>",
   "language": "<BCP 47 language tag>",
-  "authors": [
-    {
-      "name": "<author name>",
-      "email": "<author email>"
-    }
-  ],
   "description": "<short description>",
   "version": "<document version>",
   "created": "<ISO 8601 datetime>",
-  "modified": "<ISO 8601 datetime>",
+  "modified": {
+    "when": "<ISO 8601 datetime>",
+    "who": {
+      "name": "<modifier name>",
+      "email": "<modifier email>",
+      "url": "<modifier URL>"
+    }
+  },
   "license": "<SPDX license identifier or URL>",
   "keywords": ["<keyword>"],
   "cover": "<path to cover image asset>"
 }
 ```
 
-> **Required fields** (when manifest is present): `mdz`. All other fields are OPTIONAL.
+During draft `1.0.x`, `modified` MAY be either:
+
+- a string ISO 8601 datetime (legacy draft form), or
+- an object with `modified.when` (required) and optional `modified.who`.
+
+> **Required fields:** none for arbitrary hand-authored manifests.  
+> For **conforming producer-generated** manifests, `spec.version` is REQUIRED.
 
 ### 6.2 Field Definitions
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mdz` | string | **REQUIRED (if manifest is present)** | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.0"`). |
+| `spec` | object | OPTIONAL | Container for spec compatibility metadata. |
+| `spec.name` | string | OPTIONAL | Identifier for the target specification (e.g., `"markdownzip-spec"`). |
+| `spec.version` | string | CONDITIONALLY REQUIRED | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.1"`). **REQUIRED** when `manifest.json` is emitted by a conforming producer. |
+| `producer` | object | OPTIONAL | Producer provenance metadata. |
+| `producer.application` | object | OPTIONAL | User-facing tool/application that generated the archive. |
+| `producer.application.name` | string | OPTIONAL | Application/tool display name. |
+| `producer.application.version` | string | OPTIONAL | Application/tool version string. |
+| `producer.application.url` | string | OPTIONAL | URL for producer application homepage/repository. Producers **SHOULD** include when stable and available. |
+| `producer.core` | object | OPTIONAL | Underlying reusable core library/runtime used by the producer application. |
+| `producer.core.name` | string | OPTIONAL | Core library/runtime name. |
+| `producer.core.version` | string | OPTIONAL | Core library/runtime version string. |
+| `producer.core.url` | string | OPTIONAL | URL for core library/runtime homepage/repository. Producers **SHOULD** include when stable and available. |
+| `author` | object | OPTIONAL | Human/content author attribution metadata. |
+| `author.name` | string | OPTIONAL | Author display name. |
+| `author.email` | string | OPTIONAL | Author contact address. Producers **SHOULD** include when available and appropriate to disclose. |
+| `author.url` | string | OPTIONAL | Author website/profile URL. Producers **SHOULD** include when available and appropriate to disclose. |
 | `title` | string | OPTIONAL | The human-readable title of the document. If present, it **MUST NOT** be empty. If omitted, consumers **SHOULD** derive a display title from available context (for example, the entry-point, filename or first heading). |
 | `entryPoint` | string | OPTIONAL | Path to the primary Markdown file, relative to the archive root (e.g., `"chapters/start.md"`). The referenced file **MUST** exist in the archive. If omitted, consumers apply the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). |
 | `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
-| `authors` | array | OPTIONAL | An array of author objects. Each object **MAY** include `name` (string) and `email` (string) fields. |
 | `description` | string | OPTIONAL | A short plain-text description of the document. |
 | `version` | string | OPTIONAL | The version of the document itself (not the spec version). **SHOULD** follow Semantic Versioning. |
 | `created` | string | OPTIONAL | The creation datetime of the document in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format (e.g., `"2026-03-08T12:00:00Z"`). |
-| `modified` | string | OPTIONAL | The last-modified datetime of the document in ISO 8601 format. |
+| `modified` | string or object | OPTIONAL | Last-modified metadata. During draft `1.0.x`, consumers **MUST** accept both forms: ISO 8601 string (legacy) and object form. |
+| `modified.when` | string | CONDITIONALLY REQUIRED | Required when `modified` is an object. The last-modified datetime in ISO 8601 format. |
+| `modified.who` | object | OPTIONAL | Modifier identity metadata when known and appropriate to disclose. |
+| `modified.who.name` | string | OPTIONAL | Modifier display name. |
+| `modified.who.email` | string | OPTIONAL | Modifier contact address. |
+| `modified.who.url` | string | OPTIONAL | Modifier website/profile URL. |
 | `license` | string | OPTIONAL | An [SPDX license identifier](https://spdx.org/licenses/) (e.g., `"MIT"`, `"CC-BY-4.0"`) or a URL pointing to the license text. |
 | `keywords` | array of strings | OPTIONAL | A list of keywords or tags describing the document. |
 | `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"assets/images/cover.png"`). If present, it **MUST** reference an existing file in the archive. If `cover` is present but the referenced file is missing, conforming consumers **SHOULD** ignore `cover` and continue processing the archive; they **MAY** emit a warning. |
@@ -223,20 +269,41 @@ Conforming producers **MAY** include additional fields not defined in this speci
 
 ```json
 {
-  "mdz": "1.0.0",
+  "spec": {
+    "name": "markdownzip-spec",
+    "version": "1.0.1"
+  },
+  "producer": {
+    "application": {
+      "name": "mdz-cli",
+      "version": "1.2.0",
+      "url": "https://example.com/mdz-cli"
+    },
+    "core": {
+      "name": "mdz-core",
+      "version": "0.9.4",
+      "url": "https://example.com/mdz-core"
+    }
+  },
+  "author": {
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "url": "https://example.com/~jane"
+  },
   "title": "My Technical Guide",
   "entryPoint": "index.md",
   "language": "en",
-  "authors": [
-    {
-      "name": "Jane Smith",
-      "email": "jane@example.com"
-    }
-  ],
   "description": "A comprehensive guide to building widgets.",
   "version": "2.1.0",
   "created": "2026-01-15T09:00:00Z",
-  "modified": "2026-03-08T14:30:00Z",
+  "modified": {
+    "when": "2026-03-08T14:30:00Z",
+    "who": {
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "url": "https://example.com/~jane"
+    }
+  },
   "license": "CC-BY-4.0",
   "keywords": ["widgets", "guide", "tutorial"],
   "cover": "assets/images/cover.png"
@@ -332,17 +399,17 @@ This specification uses [Semantic Versioning 2.0.0](https://semver.org/):
 - **Minor version** increments indicate backwards-compatible additions or clarifications.
 - **Patch version** increments indicate corrections or editorial changes with no impact on format compatibility.
 
-### 11.2 Manifest `mdz` Field
+### 11.2 Manifest `spec.version` Field
 
-When `manifest.json` is present, the `mdz` field identifies the version of this specification that the producing tool targeted. Conforming consumers:
+When `manifest.json` includes `spec.version`, it identifies the version of this specification that the producing tool targeted. Conforming consumers:
 
-- **MUST** reject files where the `mdz` field major version is higher than the highest major version the consumer supports.
-- **SHOULD** warn users when the `mdz` field major version is lower than the consumer's current major version support.
-- **MUST** accept files where the `mdz` field minor or patch version differs from the consumer's supported version, provided the major version matches.
+- **MUST** reject files where `spec.version` major version is higher than the highest major version the consumer supports.
+- **SHOULD** warn users when `spec.version` major version is lower than the consumer's current major version support.
+- **MUST** accept files where `spec.version` minor or patch version differs from the consumer's supported version, provided the major version matches.
 
-### 11.3 Files Without `manifest.json`
+### 11.3 Manifests Without Version Metadata
 
-When `manifest.json` is omitted, the archive is unversioned. Conforming consumers:
+Conforming consumers **MUST NOT** assume that all manifests are producer-generated. If `spec.version` is absent (whether `manifest.json` is absent or present but missing `spec.version`), conforming consumers:
 
 - **MUST** treat the archive as compatible with baseline 1.x behavior defined by this specification.
 - **MUST NOT** reject the archive solely due to missing version metadata.
@@ -418,6 +485,10 @@ A conforming producer is any software that creates `.mdz` files. A conforming pr
 8. **MUST NOT** include path traversal sequences in any file path.
 9. **MUST NOT** include null bytes, ASCII control characters, or OS-reserved characters (`\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`) in any file path.
 10. **SHOULD** include all assets referenced by the document's Markdown content.
+11. When a manifest is emitted, **MUST** include `spec.version`.
+12. **SHOULD** include `producer.application.name` and `producer.application.version`.
+13. When a reusable core library/runtime is part of the producer pipeline, **SHOULD** include `producer.core.name` and `producer.core.version`.
+14. **SHOULD** include `producer.application.url`, `producer.core.url`, `author.url`, and `author.email` when available and appropriate to disclose.
 
 ### 14.2 Conforming Consumer
 
@@ -431,7 +502,7 @@ A conforming consumer is any software that reads and/or renders `.mdz` files. A 
 6. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
 7. **MUST** reject or safely handle any path that traverses outside the archive root.
 8. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
-9. **MUST** reject files where the manifest `mdz` major version exceeds the consumer's supported major version, when a manifest is present.
+9. If `spec.version` is present, **MUST** reject files where the manifest `spec.version` major version exceeds the consumer's supported major version.
 
 ---
 
@@ -473,11 +544,27 @@ my-guide.mdz
 **`manifest.json`:**
 ```json
 {
-  "mdz": "1.0.0",
+  "spec": { "name": "markdownzip-spec", "version": "1.0.1" },
+  "producer": {
+    "application": {
+      "name": "mdz-cli",
+      "version": "1.2.0",
+      "url": "https://example.com/mdz-cli"
+    },
+    "core": {
+      "name": "mdz-core",
+      "version": "0.9.4",
+      "url": "https://example.com/mdz-core"
+    }
+  },
+  "author": {
+    "name": "Alex Johnson",
+    "email": "alex@example.com",
+    "url": "https://example.com/~alex"
+  },
   "title": "My Guide",
   "entryPoint": "index.md",
   "language": "en",
-  "authors": [{ "name": "Alex Johnson" }],
   "cover": "assets/images/cover.png"
 }
 ```
@@ -513,7 +600,7 @@ When creating a `.mdz` archive, a producer can follow this sequence:
 3. Normalize text line endings to LF (`\n`) where practical.
 4. Validate file paths against [Section 5.4](#54-path-constraints).
 5. If `manifest.json` is present:
-   - verify required manifest fields (`mdz`);
+   - for producer-generated manifests, verify required field `spec.version`;
    - verify `entryPoint`, if present, exists in the archive;
    - preserve unknown fields as-is when round-tripping.
 6. Ensure at least one unambiguous entry point condition from [Section 5.5](#55-entry-point-discovery) is satisfied.
@@ -542,13 +629,13 @@ Implementations may expose stable error categories to simplify debugging and cro
 - `ERR_MANIFEST_INVALID`: `manifest.json` is malformed or missing required fields when present.
 - `ERR_ENTRYPOINT_UNRESOLVED`: no unambiguous primary Markdown file can be determined.
 - `ERR_ENTRYPOINT_MISSING`: `entryPoint` references a file not present in archive.
-- `ERR_VERSION_UNSUPPORTED`: manifest `mdz` major version is not supported.
+- `ERR_VERSION_UNSUPPORTED`: manifest `spec.version` major version is not supported.
 
 ### 16.4 AI Agent Prompting Tips
 
 To improve deterministic implementation quality, AI prompts should explicitly include:
 
-- the exact target spec version (`1.0.0-draft` or later);
+- the exact target spec version (`1.0.1-draft` or later);
 - whether producer, consumer, or both are being implemented;
 - required conformance scope (minimum MUSTs vs. SHOULDs included);
 - required behavior for ambiguous entry points;
@@ -558,7 +645,7 @@ To improve deterministic implementation quality, AI prompts should explicitly in
 
 ## 17. Future Extensions (Non-Normative)
 
-This section records possible future directions and does not define current conformance requirements for `1.0.0-draft`.
+This section records possible future directions and does not define current conformance requirements for `1.0.1-draft`.
 
 ### 17.1 Manifest-Level Document Collections
 

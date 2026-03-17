@@ -1,5 +1,8 @@
 {
-  "mdz": "1.0.0",
+  "spec": {
+    "name": "markdownzip-spec",
+    "version": "1.0.1"
+  },
   "title": "Invalid Missing Index",
   "entryPoint": "index.md"
 }

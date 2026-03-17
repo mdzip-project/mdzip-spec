@@ -1,5 +1,25 @@
 {
-  "mdz": "1.0.0",
+  "spec": {
+    "name": "markdownzip-spec",
+    "version": "1.0.1"
+  },
+  "producer": {
+    "application": {
+      "name": "mdz-cli",
+      "version": "1.2.0",
+      "url": "https://example.com/mdz-cli"
+    },
+    "core": {
+      "name": "mdz-core",
+      "version": "0.9.4",
+      "url": "https://example.com/mdz-core"
+    }
+  },
+  "author": {
+    "name": "Guide Team",
+    "email": "guide@example.com",
+    "url": "https://example.com/guide-team"
+  },
   "title": "Guide",
   "entryPoint": "index.md",
   "cover": "assets/images/cover.png"

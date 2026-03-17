@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.1-draft] - 2026-03-16
+
+### Changed
+
+- Migrated manifest compatibility metadata from top-level `mdz` to `spec.version` (with optional `spec.name`).
+- Added producer provenance structure with separate application/core tracks:
+  - `producer.application.{name,version,url}`
+  - `producer.core.{name,version,url}`
+- Added optional author contact/profile metadata under `author.{name,email,url}`.
+- Updated consumer versioning rules to key off `spec.version` when present and treat missing version metadata as unknown (non-fatal baseline compatibility path).
+- Updated conformance language to require `spec.version` for conforming producer-generated manifests and recommend producer/author URL/email metadata when appropriate.
+- Allowed draft transitional `modified` dual-form handling: ISO 8601 string (legacy) or object form with `modified.when` and optional `modified.who`.
+- Updated examples and README manifest snippets to the new schema.
+- Bumped draft version in `SPEC.md` to `1.0.1-draft` (dated `2026-03-16`).
+
 ## [1.0.0-draft] - 2026-03-08
 
 ### Added

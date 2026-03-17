@@ -2,7 +2,7 @@
 
 Specification for the **MarkdownZip** (`.mdz`) file format.
 
-Current draft release: `v1.0.0-draft` (dated `2026-03-08`).
+Current draft release: `v1.0.1-draft` (dated `2026-03-16`).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 
@@ -51,7 +51,10 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
 
    ```json
    {
-     "mdz": "1.0.0",
+     "spec": {
+       "name": "markdownzip-spec",
+       "version": "1.0.1"
+     },
      "title": "My Document",
      "entryPoint": "index.md"
    }
