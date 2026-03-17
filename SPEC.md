@@ -172,6 +172,8 @@ The manifest file, when present, **MUST** be named `manifest.json` and placed at
 
 Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as a local convenience, but conforming `.mdz` archives **MUST** contain `manifest.json` serialized as standard JSON per RFC 8259.
 
+A versioned JSON Schema companion for this draft is available at [`schema/manifest-1.0.1-draft.schema.json`](schema/manifest-1.0.1-draft.schema.json). The prose specification remains normative when differences exist.
+
 ### 6.1 Schema
 
 ```json
@@ -202,10 +204,17 @@ Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as 
   "language": "<BCP 47 language tag>",
   "description": "<short description>",
   "version": "<document version>",
-  "created": "<ISO 8601 datetime>",
+  "created": {
+    "when": "<ISO 8601 datetime>",
+    "by": {
+      "name": "<creator name>",
+      "email": "<creator email>",
+      "url": "<creator URL>"
+    }
+  },
   "modified": {
     "when": "<ISO 8601 datetime>",
-    "who": {
+    "by": {
       "name": "<modifier name>",
       "email": "<modifier email>",
       "url": "<modifier URL>"
@@ -217,10 +226,10 @@ Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as 
 }
 ```
 
-During draft `1.0.x`, `modified` MAY be either:
+During draft `1.0.x`, `created` and `modified` MAY each be either:
 
 - a string ISO 8601 datetime (legacy draft form), or
-- an object with `modified.when` (required) and optional `modified.who`.
+- an object with required `when` and optional `by`.
 
 > **Required fields:** none for arbitrary hand-authored manifests.  
 > For **conforming producer-generated** manifests, `spec.version` is REQUIRED.
@@ -250,13 +259,18 @@ During draft `1.0.x`, `modified` MAY be either:
 | `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
 | `description` | string | OPTIONAL | A short plain-text description of the document. |
 | `version` | string | OPTIONAL | The version of the document itself (not the spec version). **SHOULD** follow Semantic Versioning. |
-| `created` | string | OPTIONAL | The creation datetime of the document in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format (e.g., `"2026-03-08T12:00:00Z"`). |
+| `created` | string or object | OPTIONAL | Creation metadata. During draft `1.0.x`, consumers **MUST** accept both forms: ISO 8601 string (legacy) and object form. |
+| `created.when` | string | CONDITIONALLY REQUIRED | Required when `created` is an object. The creation datetime in ISO 8601 format. |
+| `created.by` | object | OPTIONAL | Creator identity metadata when known and appropriate to disclose. |
+| `created.by.name` | string | OPTIONAL | Creator display name. |
+| `created.by.email` | string | OPTIONAL | Creator contact address. |
+| `created.by.url` | string | OPTIONAL | Creator website/profile URL. |
 | `modified` | string or object | OPTIONAL | Last-modified metadata. During draft `1.0.x`, consumers **MUST** accept both forms: ISO 8601 string (legacy) and object form. |
 | `modified.when` | string | CONDITIONALLY REQUIRED | Required when `modified` is an object. The last-modified datetime in ISO 8601 format. |
-| `modified.who` | object | OPTIONAL | Modifier identity metadata when known and appropriate to disclose. |
-| `modified.who.name` | string | OPTIONAL | Modifier display name. |
-| `modified.who.email` | string | OPTIONAL | Modifier contact address. |
-| `modified.who.url` | string | OPTIONAL | Modifier website/profile URL. |
+| `modified.by` | object | OPTIONAL | Modifier identity metadata when known and appropriate to disclose. |
+| `modified.by.name` | string | OPTIONAL | Modifier display name. |
+| `modified.by.email` | string | OPTIONAL | Modifier contact address. |
+| `modified.by.url` | string | OPTIONAL | Modifier website/profile URL. |
 | `license` | string | OPTIONAL | An [SPDX license identifier](https://spdx.org/licenses/) (e.g., `"MIT"`, `"CC-BY-4.0"`) or a URL pointing to the license text. |
 | `keywords` | array of strings | OPTIONAL | A list of keywords or tags describing the document. |
 | `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"assets/images/cover.png"`). If present, it **MUST** reference an existing file in the archive. If `cover` is present but the referenced file is missing, conforming consumers **SHOULD** ignore `cover` and continue processing the archive; they **MAY** emit a warning. |
@@ -295,10 +309,17 @@ Conforming producers **MAY** include additional fields not defined in this speci
   "language": "en",
   "description": "A comprehensive guide to building widgets.",
   "version": "2.1.0",
-  "created": "2026-01-15T09:00:00Z",
+  "created": {
+    "when": "2026-01-15T09:00:00Z",
+    "by": {
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "url": "https://example.com/~jane"
+    }
+  },
   "modified": {
     "when": "2026-03-08T14:30:00Z",
-    "who": {
+    "by": {
       "name": "Jane Smith",
       "email": "jane@example.com",
       "url": "https://example.com/~jane"
@@ -503,6 +524,7 @@ A conforming consumer is any software that reads and/or renders `.mdz` files. A 
 7. **MUST** reject or safely handle any path that traverses outside the archive root.
 8. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
 9. If `spec.version` is present, **MUST** reject files where the manifest `spec.version` major version exceeds the consumer's supported major version.
+10. **MUST** accept draft `1.0.x` dual-form timestamp metadata for `created` and `modified` (ISO 8601 string form or object form with required `when`).
 
 ---
 
@@ -613,13 +635,32 @@ When opening a `.mdz` archive, a consumer can follow this sequence:
 1. Open archive as ZIP and reject encrypted/password-protected entries.
 2. Enumerate entries and validate path safety constraints ([Section 5.4](#54-path-constraints)).
 3. Parse `manifest.json` if present, ignoring unknown fields.
-4. If manifest `cover` is present and references a missing file, ignore `cover` and optionally warn.
-5. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
-6. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
-7. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
-8. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
+4. Accept `created` and `modified` in either draft `1.0.x` form (ISO 8601 string or object with required `when`).
+5. If manifest `cover` is present and references a missing file, ignore `cover` and optionally warn.
+6. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
+7. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
+8. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
+9. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
 
-### 16.3 Suggested Error Categories
+### 16.3 Terminology Alignment (Producer vs. Create)
+
+Normative specification text uses role terms (`producer`, `consumer`). Implementation APIs and commands may use action-oriented names such as `create` and `add`.
+
+Recommended mapping:
+
+- a `create` API/command is a producer operation;
+- an `add` API/command is also a producer operation when adding files to a new or existing archive.
+
+### 16.4 Archive Update Semantics (Non-Normative)
+
+When a producer supports adding files to an existing `.mdz` archive:
+
+- path uniqueness should be preserved in the final emitted archive (avoid duplicate logical paths);
+- adding a file to an existing path should replace that path's current entry in the resulting archive, rather than retaining duplicate ZIP entries for the same path;
+- after successful updates, producers should refresh timestamp metadata (`modified`, and `created` only when creating a new archive);
+- when rewriting `manifest.json`, producers should preserve unknown fields.
+
+### 16.5 Suggested Error Categories
 
 Implementations may expose stable error categories to simplify debugging and cross-tool behavior comparisons:
 
@@ -630,8 +671,9 @@ Implementations may expose stable error categories to simplify debugging and cro
 - `ERR_ENTRYPOINT_UNRESOLVED`: no unambiguous primary Markdown file can be determined.
 - `ERR_ENTRYPOINT_MISSING`: `entryPoint` references a file not present in archive.
 - `ERR_VERSION_UNSUPPORTED`: manifest `spec.version` major version is not supported.
+- `ERR_DUPLICATE_PATH`: duplicate logical archive paths were detected after an update operation.
 
-### 16.4 AI Agent Prompting Tips
+### 16.6 AI Agent Prompting Tips
 
 To improve deterministic implementation quality, AI prompts should explicitly include:
 

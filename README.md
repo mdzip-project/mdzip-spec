@@ -31,6 +31,7 @@ The specification covers:
 - [SPEC.md](SPEC.md) - canonical format specification
 - [examples/](examples/README.md) - sample valid and invalid package structures
 - [tests/](tests/README.md) - conformance case catalog and expected behavior
+- [schema/](schema/manifest-1.0.1-draft.schema.json) - versioned JSON Schema companion for manifest validation
 - [reference/](reference/README.md) - non-normative notes and rationale
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process

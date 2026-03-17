@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://markdownzip.dev/schema/manifest-1.0.1-draft.schema.json",
+  "title": "MarkdownZip Manifest (1.0.1-draft)",
+  "type": "object",
+  "additionalProperties": true,
+  "$comment": "This schema is a machine-readable companion. The prose specification is normative.",
+  "properties": {
+    "spec": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"
+        }
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "application": {
+          "$ref": "#/$defs/partyWithVersion"
+        },
+        "core": {
+          "$ref": "#/$defs/partyWithVersion"
+        }
+      }
+    },
+    "author": {
+      "$ref": "#/$defs/person"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entryPoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "created": {
+      "$ref": "#/$defs/timestampOrActorTimestamp"
+    },
+    "modified": {
+      "$ref": "#/$defs/timestampOrActorTimestamp"
+    },
+    "license": {
+      "type": "string"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cover": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "urlString": {
+      "type": "string",
+      "format": "uri"
+    },
+    "partyWithVersion": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/$defs/urlString"
+        }
+      }
+    },
+    "person": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "$ref": "#/$defs/urlString"
+        }
+      }
+    },
+    "actorTimestampObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "when"
+      ],
+      "properties": {
+        "when": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "by": {
+          "$ref": "#/$defs/person"
+        }
+      }
+    },
+    "timestampOrActorTimestamp": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "$ref": "#/$defs/actorTimestampObject"
+        }
+      ]
+    }
+  }
+}

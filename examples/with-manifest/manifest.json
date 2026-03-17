@@ -22,5 +22,16 @@
   },
   "title": "Guide",
   "entryPoint": "index.md",
+  "created": {
+    "when": "2026-03-16T09:00:00Z",
+    "by": {
+      "name": "Guide Team",
+      "email": "guide@example.com",
+      "url": "https://example.com/guide-team"
+    }
+  },
+  "modified": {
+    "when": "2026-03-17T10:30:00Z"
+  },
   "cover": "assets/images/cover.png"
 }

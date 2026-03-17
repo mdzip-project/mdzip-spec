@@ -13,7 +13,11 @@ All notable changes to this project are documented in this file.
 - Added optional author contact/profile metadata under `author.{name,email,url}`.
 - Updated consumer versioning rules to key off `spec.version` when present and treat missing version metadata as unknown (non-fatal baseline compatibility path).
 - Updated conformance language to require `spec.version` for conforming producer-generated manifests and recommend producer/author URL/email metadata when appropriate.
-- Allowed draft transitional `modified` dual-form handling: ISO 8601 string (legacy) or object form with `modified.when` and optional `modified.who`.
+- Allowed draft transitional `modified` dual-form handling: ISO 8601 string (legacy) or object form with `modified.when` and optional `modified.by`.
+- Aligned `created` with `modified` in draft `1.0.x`: both fields now allow string ISO 8601 form or object form with required `when` and optional `by`.
+- Added non-normative terminology alignment guidance mapping implementation actions (`create`, `add`) to producer operations.
+- Added non-normative archive update guidance for add/update flows (replace semantics, duplicate-path avoidance, manifest round-trip behavior).
+- Added versioned JSON Schema companion at `schema/manifest-1.0.1-draft.schema.json` and linked it from spec Section 6.
 - Updated examples and README manifest snippets to the new schema.
 - Bumped draft version in `SPEC.md` to `1.0.1-draft` (dated `2026-03-16`).
 

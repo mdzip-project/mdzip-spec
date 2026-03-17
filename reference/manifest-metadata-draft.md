@@ -47,8 +47,8 @@ We are moving away from a single manifest version property (for example, `mdz`) 
 - `author`: optional human/content author metadata.
 - `url`: optional discovery/provenance URL for `producer.application`, `producer.core`, and `author`.
 - `author.email`: optional contact address for human/content author attribution.
-- `modified`: draft transitional field that MAY be either an ISO 8601 string or an object (`when`, optional `who`).
-- `created`: candidate draft alignment with `modified`; MAY be either an ISO 8601 string or an object (`when`, optional `who`) for symmetry.
+- `modified`: draft transitional field that MAY be either an ISO 8601 string or an object (`when`, optional `by`).
+- `created`: draft transitional field aligned with `modified`; MAY be either an ISO 8601 string or an object (`when`, optional `by`) for symmetry.
 
 Rationale for split versions:
 
@@ -66,8 +66,8 @@ Important boundary: these rules target conforming producer implementations, not 
 - A conforming producer SHOULD include `producer.core.name` and `producer.core.version` when a reusable core library/runtime is part of the build pipeline.
 - A conforming producer SHOULD include `producer.core.url` when a stable project/library URL exists.
 - A conforming producer SHOULD include `author.url` and `author.email` when that metadata is available and appropriate to disclose.
-- During draft `1.0.x`, a conforming consumer MUST accept `modified` as either a string (legacy draft form) or object form (`modified.when`, optional `modified.who`).
-- During draft `1.0.x`, if `created` adopts the same transition model, a conforming consumer should accept `created` as either a string (legacy draft form) or object form (`created.when`, optional `created.who`).
+- During draft `1.0.x`, a conforming consumer MUST accept `modified` as either a string (legacy draft form) or object form (`modified.when`, optional `modified.by`).
+- During draft `1.0.x`, a conforming consumer should accept `created` as either a string (legacy draft form) or object form (`created.when`, optional `created.by`).
 - Manifests that are hand-authored (or otherwise not created by a conforming producer) MAY omit `spec.version`.
 
 ## Consumer Behavior Direction
@@ -115,8 +115,8 @@ Suggested starting point:
 
 - `schema/manifest-1.0.1-draft.schema.json`
 - link from `SPEC.md` Section 6 when promoted from notes to normative text
-- include draft `modified` dual-form support (`string` OR object with required `when`, optional `who`)
-- consider symmetric draft `created` dual-form support to match `modified`
+- include draft `modified` dual-form support (`string` OR object with required `when`, optional `by`)
+- include symmetric draft `created` dual-form support to match `modified`
 - keep forward-compatibility posture (`additionalProperties: true` / unknown fields tolerated)
 
 Draft intent: keep normative behavior in the prose spec, and use schema for deterministic validation/tooling.
