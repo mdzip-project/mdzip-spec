@@ -41,7 +41,7 @@ All notable changes to this project are documented in this file.
 
 - Standardized terminology to use `assets/` and `manifest.json`.
 - Clarified behavior for archives without `manifest.json`.
-- Added provisional MIME registration note for `application/vnd.markdownzip`.
+- Added provisional MIME registration note for `application/vnd.mdzip`.
 - Clarified `index.md` as a required fallback entry point (not merely the default), always present regardless of manifest `entryPoint`.
 - Updated Section 14.1 conforming producer requirements to include stub guidance (item 4).
 - Replaced mandatory `index.md` requirement with a four-step entry point discovery algorithm (Section 5.5). `index.md` is now the recommended convention, not a hard requirement.

@@ -16,7 +16,7 @@ We are moving away from a single manifest version property (for example, `mdz`) 
 ```json
 {
   "spec": {
-    "name": "markdownzip-spec",
+    "name": "mdzip-spec",
     "version": "1.0.1"
   },
   "producer": {

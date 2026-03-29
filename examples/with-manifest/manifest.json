@@ -1,6 +1,6 @@
 {
   "spec": {
-    "name": "markdownzip-spec",
+    "name": "mdzip-spec",
     "version": "1.0.1"
   },
   "producer": {

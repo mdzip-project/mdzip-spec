@@ -1,4 +1,4 @@
-# MarkdownZip (.mdz) File Format Specification
+# MDZip (.mdz) File Format Specification
 
 **Version:** 1.0.1-draft  
 **Status:** Draft  
@@ -30,7 +30,7 @@
 
 ## 1. Overview
 
-The **MarkdownZip** format (`.mdz`) is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets—such as images, stylesheets, and other referenced resources—into a single ZIP archive.
+The **MDZip** format (`.mdz`) is a portable, self-contained document format that packages one or more Markdown content files together with their associated assets—such as images, stylesheets, and other referenced resources—into a single ZIP archive.
 
 An `.mdz` file allows authors to distribute complete Markdown-based documents without broken asset references, and enables readers and tools to reliably open and render the document without external dependencies.
 
@@ -68,7 +68,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | **Manifest** | The optional `manifest.json` file at the root of the archive describing document metadata and entry-point overrides. |
 | **Asset** | Any non-Markdown file referenced by a Markdown content file (e.g., images, stylesheets). |
 | **Conforming producer** | Software that creates `.mdz` files according to this specification. |
-| **Conforming consumer** | Software that reads and renders `.mdz` files according to this specification. |
+| **Conforming consumer** | Software that reads and/or processes `.mdz` files according to this specification. |
 
 ---
 
@@ -125,7 +125,7 @@ document.mdz (ZIP archive)
 
 ### 5.4 Path Constraints
 
-- All file paths inside the archive **MUST** be relative to the archive root.
+- All file paths inside the archive **MUST** be relative to the archive root. These constraints apply to ZIP entry names, not to Markdown link syntax.
 - File paths **MUST NOT** begin with a leading slash (`/`).
 - File paths **MUST NOT** contain path traversal sequences (e.g., `../`).
 - File paths **MUST NOT** contain null bytes or ASCII control characters (U+0000–U+001F, U+007F).
@@ -155,7 +155,7 @@ Because `README.md` is inside the archive, producers distributing `.mdz` to like
 
 When present, `README.md` **SHOULD** briefly include:
 
-- what the archive is (`.mdz` / MarkdownZip),
+- what the archive is (`.mdz` / MDZip),
 - where primary document content begins (for example, `index.md`),
 - how to open the package with standard tools (for example, unzip then open Markdown files),
 - where to find format documentation (for example, a project URL).
@@ -163,6 +163,8 @@ When present, `README.md` **SHOULD** briefly include:
 Producers **MAY** include instructions for opening the package with a specific consumer tool. When they do, they **SHOULD** also include a generic fallback workflow (for example, unzip and open `index.md`) so the package remains understandable without that specific tool.
 
 `README.md` is a secondary aid and does not replace out-of-archive discovery guidance for unaware recipients. It is informational only and does not affect entry point discovery or conformance logic.
+
+A reusable sample is available at [`examples/templates/README.sample.md`](examples/templates/README.sample.md).
 
 ---
 
@@ -179,7 +181,7 @@ A versioned JSON Schema companion for this draft is available at [`schema/manife
 ```json
 {
   "spec": {
-    "name": "markdownzip-spec",
+    "name": "mdzip-spec",
     "version": "<spec version>"
   },
   "producer": {
@@ -239,7 +241,7 @@ During draft `1.0.x`, `created` and `modified` MAY each be either:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `spec` | object | OPTIONAL | Container for spec compatibility metadata. |
-| `spec.name` | string | OPTIONAL | Identifier for the target specification (e.g., `"markdownzip-spec"`). |
+| `spec.name` | string | OPTIONAL | Identifier for the target specification (e.g., `"mdzip-spec"`). |
 | `spec.version` | string | CONDITIONALLY REQUIRED | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.1"`). **REQUIRED** when `manifest.json` is emitted by a conforming producer. |
 | `producer` | object | OPTIONAL | Producer provenance metadata. |
 | `producer.application` | object | OPTIONAL | User-facing tool/application that generated the archive. |
@@ -284,7 +286,7 @@ Conforming producers **MAY** include additional fields not defined in this speci
 ```json
 {
   "spec": {
-    "name": "markdownzip-spec",
+    "name": "mdzip-spec",
     "version": "1.0.1"
   },
   "producer": {
@@ -376,6 +378,7 @@ Conforming producers **SHOULD NOT** include asset files that are not referenced 
 ### 9.1 Internal Links
 
 References to other files within the archive (Markdown files and assets) **MUST** use **relative paths** based on the location of the referencing file within the archive.
+Relative links **MAY** include `../` segments as long as the resolved path remains within the archive root.
 
 **Example:** A Markdown file at the archive root (`index.md`) referencing an image:
 ```markdown
@@ -393,7 +396,7 @@ Links to external URLs (e.g., `https://example.com`) are permitted. Conforming c
 
 ### 9.3 Path Resolution
 
-Conforming consumers **MUST** resolve relative paths against the path of the referencing file within the archive. Consumers **MUST** reject or ignore any path that resolves outside the archive root (i.e., any path traversal attempt).
+Conforming consumers **MUST** resolve relative paths against the path of the referencing file within the archive. Consumers **MUST** reject or ignore any path that resolves outside the archive root after normalization (i.e., any path traversal attempt).
 
 ---
 
@@ -402,11 +405,11 @@ Conforming consumers **MUST** resolve relative paths against the path of the ref
 | Property | Value |
 |----------|-------|
 | **File extension** | `.mdz` |
-| **MIME type** | `application/vnd.markdownzip` |
+| **MIME type** | Proposed `application/vnd.mdzip` |
 
-Producers and consumers **SHOULD** use the `.mdz` file extension. The MIME type `application/vnd.markdownzip` **SHOULD** be used when the format is transmitted over HTTP or identified in metadata.
+Producers and consumers **SHOULD** use the `.mdz` file extension. The proposed MIME type `application/vnd.mdzip` **SHOULD** be used when the format is transmitted over HTTP or identified in metadata.
 
-`application/vnd.markdownzip` is currently an unregistered vendor media type in this draft. Until formal registration is completed, implementations **MAY** treat it as provisional for interoperability testing.
+`application/vnd.mdzip` is currently an unregistered vendor media type in this draft. Until formal registration is completed, implementations **MAY** treat it as provisional for interoperability testing. For broad interoperability, servers **MAY** use `application/zip` or `application/octet-stream` as a fallback until `application/vnd.mdzip` is more widely recognized.
 
 ---
 
@@ -472,7 +475,7 @@ Conforming consumers and producers should treat `.mdz` content as potentially un
 
 ### 13.1 Archive Handling
 
-- Consumers **MUST** reject path traversal attempts that resolve outside archive root (e.g., `../`, absolute paths).
+- Consumers **MUST** reject path traversal attempts that resolve outside archive root after normalization (e.g., absolute paths or relative paths that escape the root).
 - Consumers **MUST** reject or sanitize archive entries whose paths contain characters prohibited by Section 5.4 (null bytes, control characters, or OS-reserved characters) before writing to the local filesystem.
 - Consumers **SHOULD** enforce limits on extracted entry count, total uncompressed bytes, and compression ratio to mitigate ZIP bomb attacks.
 - Consumers **SHOULD** ignore or safely handle symbolic links and hard links if exposed by the ZIP library.
@@ -513,7 +516,7 @@ A conforming producer is any software that creates `.mdz` files. A conforming pr
 
 ### 14.2 Conforming Consumer
 
-A conforming consumer is any software that reads and/or renders `.mdz` files. A conforming consumer:
+A conforming consumer is any software that reads and/or processes `.mdz` files. A conforming consumer:
 
 1. **MUST** be able to open and extract a valid ZIP archive.
 2. **MUST** determine the primary Markdown file using the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery).
@@ -544,7 +547,7 @@ hello.mdz
 ```markdown
 # Hello World
 
-This is a minimal MarkdownZip document.
+This is a minimal MDZip document.
 ```
 
 ---
@@ -566,7 +569,7 @@ my-guide.mdz
 **`manifest.json`:**
 ```json
 {
-  "spec": { "name": "markdownzip-spec", "version": "1.0.1" },
+  "spec": { "name": "mdzip-spec", "version": "1.0.1" },
   "producer": {
     "application": {
       "name": "mdz-cli",
@@ -735,7 +738,7 @@ Embedding "last read" data directly inside `.mdz` is not part of this draft and 
 
 ### 17.3 Bookmarks
 
-A future ecosystem convention may define bookmark support so readers can save and return to notable locations within MarkdownZip documents.
+A future ecosystem convention may define bookmark support so readers can save and return to notable locations within MDZip documents.
 
 As with resume state, bookmark data is best treated as consumer-local user state by default. Implementations should prefer:
 

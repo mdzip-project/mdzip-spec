@@ -15,3 +15,4 @@ Sample `.mdz` package structures for implementers.
 - Treat each directory as archive-root content, zip it, then rename to `.mdz`.
 - Expected outcomes are documented in [tests/README.md](../tests/README.md).
 - Prebuilt fixture archives are available in [`examples/fixtures/`](fixtures/).
+- A reusable human-facing package `README.md` template is available at [`examples/templates/README.sample.md`](templates/README.sample.md).

@@ -1,6 +1,6 @@
-# MarkdownZip Specification
+# MDZip Specification
 
-Specification for the **MarkdownZip** (`.mdz`) file format.
+Specification for the **MDZip** (`.mdz`) file format.
 
 Current draft release: `v1.0.1-draft` (dated `2026-03-16`).
 
@@ -22,7 +22,7 @@ The specification covers:
 - **Markdown content** - Encoding, dialect guidance, and multi-page support
 - **Assets** - Bundling images and other resources
 - **Linking** - How to reference files within the archive
-- **MIME type** - `application/vnd.markdownzip` with the `.mdz` extension
+- **MIME type** - Proposed `application/vnd.mdzip` with the `.mdz` extension
 - **Versioning** - Semantic versioning of the spec and compatibility rules
 - **Conformance** - Requirements for producers and consumers
 
@@ -45,7 +45,7 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    ```markdown
    # My Document
 
-   Hello from MarkdownZip!
+   Hello from MDZip!
    ```
 
 2. *(Optional)* **`manifest.json`** for metadata and entry-point override:
@@ -53,7 +53,7 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    ```json
    {
      "spec": {
-       "name": "markdownzip-spec",
+      "name": "mdzip-spec",
        "version": "1.0.1"
      },
      "title": "My Document",
