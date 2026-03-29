@@ -291,14 +291,14 @@ Conforming producers **MAY** include additional fields not defined in this speci
   },
   "producer": {
     "application": {
-      "name": "mdz-cli",
+      "name": "mdzip-cli",
       "version": "1.2.0",
-      "url": "https://example.com/mdz-cli"
+      "url": "https://example.com/mdzip-cli"
     },
     "core": {
-      "name": "mdz-core",
+      "name": "mdzip-core",
       "version": "0.9.4",
-      "url": "https://example.com/mdz-core"
+      "url": "https://example.com/mdzip-core"
     }
   },
   "author": {
@@ -572,14 +572,14 @@ my-guide.mdz
   "spec": { "name": "mdzip-spec", "version": "1.0.1" },
   "producer": {
     "application": {
-      "name": "mdz-cli",
+      "name": "mdzip-cli",
       "version": "1.2.0",
-      "url": "https://example.com/mdz-cli"
+      "url": "https://example.com/mdzip-cli"
     },
     "core": {
-      "name": "mdz-core",
+      "name": "mdzip-core",
       "version": "0.9.4",
-      "url": "https://example.com/mdz-core"
+      "url": "https://example.com/mdzip-core"
     }
   },
   "author": {
@@ -771,3 +771,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for repository workflow.
 ---
 
 *End of Specification*
+

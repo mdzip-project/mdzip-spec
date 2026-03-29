@@ -21,14 +21,14 @@ We are moving away from a single manifest version property (for example, `mdz`) 
   },
   "producer": {
     "application": {
-      "name": "mdz-cli",
+      "name": "mdzip-cli",
       "version": "1.0.0-beta.3",
-      "url": "https://example.com/mdz-cli"
+      "url": "https://example.com/mdzip-cli"
     },
     "core": {
-      "name": "mdz-core",
+      "name": "mdzip-core",
       "version": "0.8.2",
-      "url": "https://example.com/mdz-core"
+      "url": "https://example.com/mdzip-core"
     }
   },
   "author": {
@@ -120,3 +120,4 @@ Suggested starting point:
 - keep forward-compatibility posture (`additionalProperties: true` / unknown fields tolerated)
 
 Draft intent: keep normative behavior in the prose spec, and use schema for deterministic validation/tooling.
+
