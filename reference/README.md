@@ -18,17 +18,16 @@ ZIP's random-access entry model is a meaningful advantage: a consumer can read `
 
 ---
 
-## Why `index.md` as the required entry point name?
+## Why `index.md` as the conventional entry point name?
 
 The name mirrors the long-established web convention of `index.html` as the default document for a directory. It is immediately familiar to anyone who has worked with static sites or web servers, and it requires no explanation to most developers.
 
-Requiring a fixed fallback name — rather than making the entry point entirely manifest-driven — also ensures that a minimal valid `.mdz` file is as simple as possible: rename a ZIP containing `index.md` and you have a conforming archive, no manifest needed.
+Using a fixed conventional name rather than making the entry point entirely manifest-drive also keeps the minimal `.mdz` case simple: rename a ZIP containing `index.md` and you have a conforming archive, no manifest needed. The spec still allows a manifest `entryPoint` to override the default when present and valid.
 
 ---
-
 ## Why JSON for the manifest?
 
-JSON is the lowest-friction structured data format with universal library support. Every language that might implement an MDZ consumer already has a JSON parser.
+JSON is the lowest-friction structured data format with universal library support. Every language that might implement an MDZip consumer already has a JSON parser.
 
 Alternatives considered:
 
@@ -55,15 +54,6 @@ Requiring LF absolutely would technically invalidate archives created on Windows
 Consumers are required (`MUST`) to accept both, so the practical interoperability impact of CRLF in an archive is zero — it just creates mild inconsistency in the raw archive contents.
 
 ---
-
-## Why `index.md` is always required even when `entryPoint` overrides it
-
-An earlier draft allowed `index.md` to be omitted when a manifest `entryPoint` specified a different primary document. This was reverted for backwards compatibility: a consumer that does not support `manifest.json` — whether because it predates the manifest feature or is a minimal implementation — will always look for `index.md`. Omitting it causes a silent failure with no recoverable path for those consumers.
-
-Requiring `index.md` as a permanent fallback entry point means the format degrades gracefully. When `entryPoint` differs, producers are encouraged to make `index.md` a lightweight stub with a link to the real document, so even consumers that cannot read the manifest present the user with something actionable.
-
----
-
 ## Why no encryption or DRM?
 
 Encryption would require key management, which is a complex problem this spec has no business solving. Any encryption scheme added here would either be weak (a false sense of security) or require significant protocol design work well outside the scope of a document container format.
@@ -109,3 +99,5 @@ If instead the `.md` file is extracted alone and opened in a generic Markdown ed
 Extracting the entire archive first preserves the directory structure, so a generic editor may then resolve the relative paths correctly — but this defeats the portability purpose of the format and requires the user to manage extracted files manually.
 
 This is the core reason the spec defines path resolution semantics (Section 9.3) and why tooling that understands the archive context is necessary to deliver the full `.mdz` experience. The format is inspectable without a dedicated consumer; it is only fully renderable with one.
+
+
