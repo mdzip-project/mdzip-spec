@@ -1,8 +1,8 @@
 # MDZip (.mdz) File Format Specification
 
-**Version:** 1.0.1-draft  
+**Version:** 1.1.0-draft  
 **Status:** Draft  
-**Date:** 2026-03-16
+**Date:** 2026-04-05
 
 ---
 
@@ -69,6 +69,9 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | **Asset** | Any non-Markdown file referenced by a Markdown content file (e.g., images, stylesheets). |
 | **Conforming producer** | Software that creates `.mdz` files according to this specification. |
 | **Conforming consumer** | Software that reads and/or processes `.mdz` files according to this specification. |
+| **Mode** | The declared interpretation intent of an archive's contents, specified via `manifest.mode`. Controls how consumers render and navigate content. |
+| **Document mode** | A mode in which the archive represents a single logical document. The default when no mode is declared. |
+| **Project mode** | A mode in which the archive represents a collection of independent Markdown documents. Requires an explicit manifest declaring `"mode": "project"`. |
 
 ---
 
@@ -108,6 +111,8 @@ There are no unconditionally required files beyond the archive being a valid ZIP
 
 ### 5.3 Recommended Layout
 
+#### Document Mode
+
 ```
 document.mdz (ZIP archive)
 ├── index.md               # Recommended: conventional entry point
@@ -115,22 +120,72 @@ document.mdz (ZIP archive)
 ├── README.md              # Optional: human-facing usage notes
 ├── chapter-01.md          # Additional Markdown files (optional)
 ├── chapter-02.md
-└── assets/                # Recommended directory for non-Markdown files
-    ├── images/
-    │   ├── cover.png
-    │   └── diagram.svg
-    └── styles/
-        └── style.css
+├── images/                # Asset directories at archive root
+│   ├── cover.png
+│   └── diagram.svg
+└── styles/
+    └── style.css
+```
+
+#### Project Mode
+
+Project archives SHOULD organize Markdown files into subdirectories by section or topic. Asset directories live at the archive root for small projects; larger projects MAY scope assets per section when it adds clarity.
+
+**Flat assets (small to medium projects):**
+
+```
+project.mdz (ZIP archive)
+├── manifest.json          # Required: must declare "mode": "project"
+├── index.md               # Entry point: overview or home page
+├── README.md              # Optional: human-facing usage notes
+├── guide/
+│   ├── intro.md
+│   ├── setup.md
+│   └── advanced.md
+├── reference/
+│   ├── api.md
+│   └── cli.md
+├── images/                # Shared asset directories at archive root
+│   ├── logo.png
+│   └── banner.png
+└── styles/
+    └── style.css
+```
+
+**Per-section assets (larger projects):**
+
+```
+project.mdz (ZIP archive)
+├── manifest.json          # Required: must declare "mode": "project"
+├── index.md               # Entry point: overview or home page
+├── README.md              # Optional: human-facing usage notes
+├── guide/
+│   ├── intro.md
+│   ├── setup.md
+│   └── images/            # Section-scoped assets
+│       └── setup-screenshot.png
+├── reference/
+│   ├── api.md
+│   └── images/
+│       └── architecture.svg
+└── styles/                # Shared styles at archive root
+    └── style.css
 ```
 
 ### 5.4 Path Constraints
 
-- All file paths inside the archive **MUST** be relative to the archive root. These constraints apply to ZIP entry names, not to Markdown link syntax.
+> **Note for authors:** These constraints apply to ZIP entry names inside the archive — the internal paths used to store files. They do not apply to relative links within your Markdown content (e.g., `[next chapter](guide/chapter-02.md)` or `![diagram](images/diagram.svg)`), which follow normal Markdown and relative URL conventions. Authors using a standard tool to create `.mdz` files will never need to think about this — the tool and the operating system handle it. This section is aimed at implementors building producers or consumers in code.
+
+The ZIP format permits entry names that are unsafe or non-portable across operating systems. MDZip imposes tighter constraints to ensure archives are safe to extract and consistent across platforms.
+
+- All file paths inside the archive **MUST** be relative to the archive root.
 - File paths **MUST NOT** begin with a leading slash (`/`).
 - File paths **MUST NOT** contain path traversal sequences (e.g., `../`).
 - File paths **MUST NOT** contain null bytes or ASCII control characters (U+0000–U+001F, U+007F).
 - File paths **MUST NOT** contain characters reserved by common operating systems: `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`.
 - File paths **SHOULD** use lowercase characters.
+
+See [Section 13.1](#131-archive-handling) for consumer requirements on rejecting non-conforming paths.
 
 ### 5.5 Entry Point Discovery
 
@@ -166,6 +221,86 @@ Producers **MAY** include instructions for opening the package with a specific c
 
 A reusable sample is available at [`examples/templates/README.sample.md`](examples/templates/README.sample.md).
 
+### 5.7 Mode Semantics
+
+An `.mdz` archive has an **interpretation mode** that tells conforming consumers how to render and navigate its contents. Mode is either applied by default or explicitly declared via `manifest.mode`. Mode values are case-sensitive and MUST be lowercase.
+
+#### 5.7.1 Mode Defaults
+
+If `manifest.json` is absent, or if `manifest.json` is present but does not include a `mode` field, consumers MUST treat the archive as `mode: "document"`. This is a default, not an inference — the rule is deterministic and requires no examination of archive contents.
+
+The number of Markdown files present, their names, or the directory structure of the archive MUST NOT influence mode selection.
+
+#### 5.7.2 Document Mode
+
+`document` mode indicates that the archive represents a **single logical document**, regardless of how many Markdown files it contains.
+
+**Consumers MUST:**
+
+- Resolve the entry point using the standard entry point discovery algorithm (Section 5.5)
+- Render content as a single document
+
+**Consumers MAY:**
+
+- Inline or process referenced Markdown files as part of a unified document view
+- Apply transformations that produce a single rendered output
+
+This is the default mode and applies when no manifest is present or when `manifest.mode` is `"document"`.
+
+#### 5.7.3 Project Mode
+
+`project` mode indicates that the archive represents a **collection of independent Markdown documents** with navigational relationships between them.
+
+**Requirements:**
+
+- A `manifest.json` file MUST be present
+- The manifest MUST declare `"mode": "project"`
+- The manifest SHOULD define a valid `entryPoint`
+
+**Consumers MUST:**
+
+- Treat each Markdown file as a separate document
+- NOT flatten or merge Markdown files into a single logical document
+
+**Consumers MAY:**
+
+- Provide navigation UI (for example, a sidebar or table of contents)
+- Support cross-document linking
+- Allow users to open any file directly, not only the entry point
+
+> **Note on navigation structure:** This specification does not define ordered navigation, pagination, or table-of-contents layout. `project` mode establishes that documents MUST be preserved as separate units; it does not mandate how consumers surface navigation to users.
+
+#### 5.7.4 Entry Point Semantics by Mode
+
+In `document` mode:
+
+- Entry point is resolved using the standard discovery algorithm (Section 5.5)
+
+In `project` mode:
+
+- If `manifest.entryPoint` is present, it MUST be used as the primary entry point
+- If `manifest.entryPoint` is absent, consumers MUST apply the standard discovery algorithm
+- Consumers MUST NOT arbitrarily select a file when no unambiguous entry point can be determined
+
+#### 5.7.5 Unrecognized Mode Values
+
+If `manifest.mode` contains a value not recognized by the consumer (for example, a value defined in a future spec version), the consumer:
+
+- MUST NOT silently fall back to `document` mode
+- SHOULD fail with error `ERR_MODE_UNSUPPORTED` and report the unrecognized value
+- MAY offer the user a choice to proceed in `document` mode as an explicit override
+
+This preserves the spec's principle that consumers MUST NOT rely on heuristics to infer structure.
+
+#### 5.7.6 Consumer Support Levels
+
+Consumers MAY support one or both modes:
+
+- **Document-only consumers** MUST support `document` mode. When encountering `project` mode, they MAY fall back to `document` mode provided they emit a clear warning that `project` mode is not supported and the archive will be treated as a single document. They MAY instead fail with `ERR_MODE_UNSUPPORTED`. Silent fallback without any warning is NOT permitted.
+- **Full-featured consumers** SHOULD support both modes.
+
+A consumer MUST NOT silently render an archive incorrectly when it encounters a mode it cannot handle. For **unrecognized** mode values (values not defined in this spec), consumers MUST NOT fall back silently and SHOULD fail with `ERR_MODE_UNSUPPORTED`. For **recognized but unsupported** modes (e.g. a document-only consumer encountering `project`), warn-and-fallback to `document` is conforming provided the warning is user-visible.
+
 ---
 
 ## 6. Manifest File
@@ -174,7 +309,7 @@ The manifest file, when present, **MUST** be named `manifest.json` and placed at
 
 Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as a local convenience, but conforming `.mdz` archives **MUST** contain `manifest.json` serialized as standard JSON per RFC 8259.
 
-A versioned JSON Schema companion for this draft is available at [`schema/manifest-1.0.1-draft.schema.json`](schema/manifest-1.0.1-draft.schema.json). The prose specification remains normative when differences exist.
+A versioned JSON Schema companion for this draft is available at [`schema/manifest-1.1.0-draft.schema.json`](schema/manifest-1.1.0-draft.schema.json). The prose specification remains normative when differences exist.
 
 ### 6.1 Schema
 
@@ -202,6 +337,7 @@ A versioned JSON Schema companion for this draft is available at [`schema/manife
     "url": "<author URL>"
   },
   "title": "<document title>",
+  "mode": "<interpretation mode>",
   "entryPoint": "<path to entry point markdown file>",
   "language": "<BCP 47 language tag>",
   "description": "<short description>",
@@ -242,7 +378,7 @@ During draft `1.0.x`, `created` and `modified` MAY each be either:
 |-------|------|----------|-------------|
 | `spec` | object | OPTIONAL | Container for spec compatibility metadata. |
 | `spec.name` | string | OPTIONAL | Identifier for the target specification (e.g., `"mdzip-spec"`). |
-| `spec.version` | string | CONDITIONALLY REQUIRED | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.0.1"`). **REQUIRED** when `manifest.json` is emitted by a conforming producer. |
+| `spec.version` | string | CONDITIONALLY REQUIRED | The version of this specification the file conforms to. **MUST** be a [Semantic Versioning 2.0.0](https://semver.org/) string (e.g., `"1.1.0"`). **REQUIRED** when `manifest.json` is emitted by a conforming producer. |
 | `producer` | object | OPTIONAL | Producer provenance metadata. |
 | `producer.application` | object | OPTIONAL | User-facing tool/application that generated the archive. |
 | `producer.application.name` | string | OPTIONAL | Application/tool display name. |
@@ -257,6 +393,7 @@ During draft `1.0.x`, `created` and `modified` MAY each be either:
 | `author.email` | string | OPTIONAL | Author contact address. Producers **SHOULD** include when available and appropriate to disclose. |
 | `author.url` | string | OPTIONAL | Author website/profile URL. Producers **SHOULD** include when available and appropriate to disclose. |
 | `title` | string | OPTIONAL | The human-readable title of the document. If present, it **MUST NOT** be empty. If omitted, consumers **SHOULD** derive a display title from available context (for example, the entry-point, filename or first heading). |
+| `mode` | string | OPTIONAL | The interpretation mode of the archive. Allowed values: `"document"` (default), `"project"`. Values are case-sensitive and MUST be lowercase. If absent, consumers MUST assume `"document"`. If present with an unrecognized value (including incorrect casing such as `"Document"` or `"PROJECT"`), consumers MUST NOT silently fall back to `document` mode. MUST be `"project"` when the archive represents a multi-document structure. See [Section 5.7](#57-mode-semantics). |
 | `entryPoint` | string | OPTIONAL | Path to the primary Markdown file, relative to the archive root (e.g., `"chapters/start.md"`). The referenced file **MUST** exist in the archive. If omitted, consumers apply the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). |
 | `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
 | `description` | string | OPTIONAL | A short plain-text description of the document. |
@@ -275,19 +412,21 @@ During draft `1.0.x`, `created` and `modified` MAY each be either:
 | `modified.by.url` | string | OPTIONAL | Modifier website/profile URL. |
 | `license` | string | OPTIONAL | An [SPDX license identifier](https://spdx.org/licenses/) (e.g., `"MIT"`, `"CC-BY-4.0"`) or a URL pointing to the license text. |
 | `keywords` | array of strings | OPTIONAL | A list of keywords or tags describing the document. |
-| `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"assets/images/cover.png"`). If present, it **MUST** reference an existing file in the archive. If `cover` is present but the referenced file is missing, conforming consumers **SHOULD** ignore `cover` and continue processing the archive; they **MAY** emit a warning. |
+| `cover` | string | OPTIONAL | Archive-root-relative path to a cover image asset (e.g., `"images/cover.png"`). If present, it **MUST** reference an existing file in the archive. If `cover` is present but the referenced file is missing, conforming consumers **SHOULD** ignore `cover` and continue processing the archive; they **MAY** emit a warning. |
 
 ### 6.3 Additional Fields
 
 Conforming producers **MAY** include additional fields not defined in this specification. Conforming consumers **MUST** ignore any unrecognized fields.
 
-### 6.4 Example Manifest
+### 6.4 Example Manifests
+
+#### Document Mode (default — `mode` field may be omitted)
 
 ```json
 {
   "spec": {
     "name": "mdzip-spec",
-    "version": "1.0.1"
+    "version": "1.1.0"
   },
   "producer": {
     "application": {
@@ -329,7 +468,29 @@ Conforming producers **MAY** include additional fields not defined in this speci
   },
   "license": "CC-BY-4.0",
   "keywords": ["widgets", "guide", "tutorial"],
-  "cover": "assets/images/cover.png"
+  "cover": "images/cover.png"
+}
+```
+
+#### Project Mode
+
+```json
+{
+  "spec": {
+    "name": "mdzip-spec",
+    "version": "1.1.0"
+  },
+  "producer": {
+    "application": {
+      "name": "mdzip-cli",
+      "version": "1.3.0",
+      "url": "https://example.com/mdzip-cli"
+    }
+  },
+  "title": "My Documentation Site",
+  "mode": "project",
+  "entryPoint": "index.md",
+  "language": "en"
 }
 ```
 
@@ -361,7 +522,7 @@ Asset files are any non-Markdown files bundled in the archive, such as images, s
 
 ### 8.1 Placement
 
-Assets **SHOULD** be placed under an `assets/` directory at the archive root. Subdirectories within `assets/` are permitted and **RECOMMENDED** for organization (e.g., `assets/images/`, `assets/styles/`).
+Assets **SHOULD** be organized in named subdirectories at the archive root, grouped by type (e.g., `images/`, `styles/`, `fonts/`, `pdf/`). Additional hierarchy within those directories is **RECOMMENDED** when the volume of files warrants it. A dedicated `assets/` parent directory **MAY** be used to group all asset directories together, but is not required.
 
 ### 8.2 Allowed Asset Types
 
@@ -382,12 +543,12 @@ Relative links **MAY** include `../` segments as long as the resolved path remai
 
 **Example:** A Markdown file at the archive root (`index.md`) referencing an image:
 ```markdown
-![Diagram](assets/images/diagram.svg)
+![Diagram](images/diagram.svg)
 ```
 
 **Example:** A Markdown file in a subdirectory (`chapters/intro.md`) referencing an image at the archive root:
 ```markdown
-![Logo](../assets/images/logo.png)
+![Logo](../images/logo.png)
 ```
 
 ### 9.2 External Links
@@ -503,16 +664,17 @@ A conforming producer is any software that creates `.mdz` files. A conforming pr
 2. **MUST** ensure the archive satisfies at least one of the first three conditions of the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery).
 3. **SHOULD** include `index.md` at the archive root or provide a `manifest.json` with `entryPoint` defined, as these are the most broadly compatible approaches.
 4. **MUST** include the file referenced by `entryPoint` when a manifest is present and defines `entryPoint`.
-5. **MUST** use UTF-8 encoding for all Markdown and JSON files.
-6. **SHOULD** write LF (`\n`) line endings for all text files in the archive.
-7. **MUST** use forward-slash path separators in the archive.
-8. **MUST NOT** include path traversal sequences in any file path.
-9. **MUST NOT** include null bytes, ASCII control characters, or OS-reserved characters (`\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`) in any file path.
-10. **SHOULD** include all assets referenced by the document's Markdown content.
-11. When a manifest is emitted, **MUST** include `spec.version`.
-12. **SHOULD** include `producer.application.name` and `producer.application.version`.
-13. When a reusable core library/runtime is part of the producer pipeline, **SHOULD** include `producer.core.name` and `producer.core.version`.
-14. **SHOULD** include `producer.application.url`, `producer.core.url`, `author.url`, and `author.email` when available and appropriate to disclose.
+5. When `manifest.mode` is `"project"`, **MUST** ensure the archive satisfies at least one of the first three conditions of the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). **SHOULD** include `entryPoint` explicitly as the most interoperable approach.
+6. **MUST** use UTF-8 encoding for all Markdown and JSON files.
+7. **SHOULD** write LF (`\n`) line endings for all text files in the archive.
+8. **MUST** use forward-slash path separators in the archive.
+9. **MUST NOT** include path traversal sequences in any file path.
+10. **MUST NOT** include null bytes, ASCII control characters, or OS-reserved characters (`\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`) in any file path.
+11. **SHOULD** include all assets referenced by the document's Markdown content.
+12. When a manifest is emitted, **MUST** include `spec.version`.
+13. **SHOULD** include `producer.application.name` and `producer.application.version`.
+14. When a reusable core library/runtime is part of the producer pipeline, **SHOULD** include `producer.core.name` and `producer.core.version`.
+15. **SHOULD** include `producer.application.url`, `producer.core.url`, `author.url`, and `author.email` when available and appropriate to disclose.
 
 ### 14.2 Conforming Consumer
 
@@ -522,12 +684,15 @@ A conforming consumer is any software that reads and/or processes `.mdz` files. 
 2. **MUST** determine the primary Markdown file using the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery).
 3. **MUST NOT** silently select a Markdown file arbitrarily when no unambiguous entry point can be determined. The consumer **SHOULD** present the user with a list of available Markdown files or report a clear error.
 4. **MUST** parse `manifest.json` when present and ignore unrecognized fields.
-5. If manifest `cover` is present but references a missing file, **SHOULD** ignore `cover` and continue processing the archive; **MAY** emit a warning.
-6. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
-7. **MUST** reject or safely handle any path that traverses outside the archive root.
-8. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
-9. If `spec.version` is present, **MUST** reject files where the manifest `spec.version` major version exceeds the consumer's supported major version.
-10. **MUST** accept draft `1.0.x` dual-form timestamp metadata for `created` and `modified` (ISO 8601 string form or object form with required `when`).
+5. If `manifest.mode` is present and recognized, **MUST** interpret the archive according to the declared mode as defined in [Section 5.7](#57-mode-semantics).
+6. If `manifest.mode` is present and unrecognized, **MUST NOT** silently fall back to `document` mode. **SHOULD** fail with `ERR_MODE_UNSUPPORTED`.
+7. If `manifest.mode` is absent, **MUST** treat the archive as `mode: "document"`.
+8. If manifest `cover` is present but references a missing file, **SHOULD** ignore `cover` and continue processing the archive; **MAY** emit a warning.
+9. **MUST** resolve asset and document links relative to the referencing file's location within the archive.
+10. **MUST** reject or safely handle any path that traverses outside the archive root.
+11. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
+12. If `spec.version` is present, **MUST** reject files where the manifest `spec.version` major version exceeds the consumer's supported major version.
+13. **MUST** accept draft `1.0.x` dual-form timestamp metadata for `created` and `modified` (ISO 8601 string form or object form with required `when`).
 
 ---
 
@@ -560,16 +725,15 @@ my-guide.mdz
 ├── manifest.json
 ├── index.md
 ├── chapter-01.md
-└── assets/
-    └── images/
-        ├── cover.png
-        └── screenshot.png
+└── images/
+    ├── cover.png
+    └── screenshot.png
 ```
 
 **`manifest.json`:**
 ```json
 {
-  "spec": { "name": "mdzip-spec", "version": "1.0.1" },
+  "spec": { "name": "mdzip-spec", "version": "1.1.0" },
   "producer": {
     "application": {
       "name": "mdzip-cli",
@@ -590,7 +754,7 @@ my-guide.mdz
   "title": "My Guide",
   "entryPoint": "index.md",
   "language": "en",
-  "cover": "assets/images/cover.png"
+  "cover": "images/cover.png"
 }
 ```
 
@@ -607,7 +771,7 @@ Welcome to the guide. See [Chapter 1](chapter-01.md) to get started.
 
 Here is a screenshot of the interface:
 
-![Screenshot](assets/images/screenshot.png)
+![Screenshot](images/screenshot.png)
 ```
 
 ---
@@ -638,12 +802,13 @@ When opening a `.mdz` archive, a consumer can follow this sequence:
 1. Open archive as ZIP and reject encrypted/password-protected entries.
 2. Enumerate entries and validate path safety constraints ([Section 5.4](#54-path-constraints)).
 3. Parse `manifest.json` if present, ignoring unknown fields.
-4. Accept `created` and `modified` in either draft `1.0.x` form (ISO 8601 string or object with required `when`).
-5. If manifest `cover` is present and references a missing file, ignore `cover` and optionally warn.
-6. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
-7. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
-8. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
-9. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
+4. Check `manifest.mode`: apply declared mode per [Section 5.7](#57-mode-semantics); default to `document` if absent; fail with `ERR_MODE_UNSUPPORTED` if unrecognized.
+5. Accept `created` and `modified` in either draft `1.0.x` form (ISO 8601 string or object with required `when`).
+6. If manifest `cover` is present and references a missing file, ignore `cover` and optionally warn.
+7. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery).
+8. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
+9. Resolve relative links per [Section 9](#9-linking-and-references), rejecting escape attempts outside archive root.
+10. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
 
 ### 16.3 Terminology Alignment (Producer vs. Create)
 
@@ -675,12 +840,13 @@ Implementations may expose stable error categories to simplify debugging and cro
 - `ERR_ENTRYPOINT_MISSING`: `entryPoint` references a file not present in archive.
 - `ERR_VERSION_UNSUPPORTED`: manifest `spec.version` major version is not supported.
 - `ERR_DUPLICATE_PATH`: duplicate logical archive paths were detected after an update operation.
+- `ERR_MODE_UNSUPPORTED`: the manifest declares a `mode` value that the consumer does not support or does not recognize.
 
 ### 16.6 AI Agent Prompting Tips
 
 To improve deterministic implementation quality, AI prompts should explicitly include:
 
-- the exact target spec version (`1.0.1-draft` or later);
+- the exact target spec version (`1.1.0-draft` or later);
 - whether producer, consumer, or both are being implemented;
 - required conformance scope (minimum MUSTs vs. SHOULDs included);
 - required behavior for ambiguous entry points;
@@ -690,9 +856,11 @@ To improve deterministic implementation quality, AI prompts should explicitly in
 
 ## 17. Future Extensions (Non-Normative)
 
-This section records possible future directions and does not define current conformance requirements for `1.0.1-draft`.
+This section records possible future directions and does not define current conformance requirements for `1.1.0-draft`.
 
 ### 17.1 Manifest-Level Document Collections
+
+> **Note:** The `document` and `project` mode semantics introduced in [Section 5.7](#57-mode-semantics) address the foundational use case described here. The `documents` array for per-file metadata (title, order, authors) remains a potential future extension and is not defined in this version.
 
 A future version may define an optional manifest field (for example, `documents`) to describe multi-file documents with per-file metadata.
 

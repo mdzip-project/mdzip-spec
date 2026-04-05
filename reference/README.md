@@ -92,12 +92,41 @@ The spec restricts the intersection that causes cross-platform failures. Forward
 
 An `.mdz` file is only fully portable when opened by a tool that understands it is operating inside an archive. This is most visible with assets such as images.
 
-When a Markdown file inside an archive references an image with a relative path — e.g., `![Diagram](assets/images/diagram.svg)` — a conforming consumer resolves that path within the archive's virtual filesystem, finds the entry, and serves it inline during rendering. The image displays correctly.
+When a Markdown file inside an archive references an image with a relative path — e.g., `![Diagram](images/diagram.svg)` — a conforming consumer resolves that path within the archive's virtual filesystem, finds the entry, and serves it inline during rendering. The image displays correctly.
 
-If instead the `.md` file is extracted alone and opened in a generic Markdown editor, the editor looks for `assets/images/diagram.svg` on the local filesystem relative to the file's location on disk. That path doesn't exist, and the image is broken.
+If instead the `.md` file is extracted alone and opened in a generic Markdown editor, the editor looks for `images/diagram.svg` on the local filesystem relative to the file's location on disk. That path doesn't exist, and the image is broken.
 
 Extracting the entire archive first preserves the directory structure, so a generic editor may then resolve the relative paths correctly — but this defeats the portability purpose of the format and requires the user to manage extracted files manually.
 
 This is the core reason the spec defines path resolution semantics (Section 9.3) and why tooling that understands the archive context is necessary to deliver the full `.mdz` experience. The format is inspectable without a dedicated consumer; it is only fully renderable with one.
+
+---
+
+## Why flat asset directories instead of an `assets/` wrapper?
+
+Earlier drafts recommended placing all assets under a single `assets/` parent directory (e.g., `assets/images/`, `assets/styles/`). This was changed to recommend type-named directories directly at the archive root (e.g., `images/`, `styles/`, `fonts/`).
+
+The `assets/` wrapper adds a level of nesting without adding meaning. Directory names like `images/` and `styles/` are already self-describing — grouping them under `assets/` tells you nothing you couldn't already infer from the names themselves. The extra nesting makes paths longer and the structure slightly harder to read.
+
+The `assets/` wrapper is still permitted (producers MAY use it), and it remains a reasonable choice for producers who want a clear visual boundary between content files and supporting files. But it is no longer the recommended default.
+
+For larger projects where assets are scoped per section, the section directory itself provides the namespace, making the wrapper even less useful.
+
+---
+
+## Why mode semantics, and why does project mode require a manifest?
+
+Without modes, a consumer opening a multi-file `.mdz` archive cannot know whether those files form one logical document (a book with chapters) or a collection of independent pages (a documentation site). The only alternatives are heuristics — guessing based on file count or directory structure — or leaving the interpretation to each consumer independently. Both produce inconsistent behavior across tools.
+
+Mode semantics resolve this by making the intent explicit. Two modes are defined:
+
+- `document` — the archive is a single logical document. This is the default and covers the vast majority of use cases.
+- `project` — the archive is a collection of independent documents.
+
+**Why is document mode the default?** Because it matches the primary use case and requires no manifest. Existing archives without a manifest remain valid. Simple producers can continue to omit the manifest entirely.
+
+**Why does project mode require an explicit manifest?** Because mode MUST NOT be inferred from archive contents. If a consumer could guess `project` mode from the presence of multiple Markdown files, different consumers would make different guesses and behavior would diverge. Requiring an explicit declaration ensures every consumer interprets the archive the same way. The manifest is also already the natural place for interpretation metadata — it is how `entryPoint` and other behavioral properties are declared.
+
+**Why not infer mode from file count or structure?** Inference is fragile and ambiguous. A document split into chapters has multiple Markdown files but is still one logical document. A project with a single overview page has one Markdown file but is still a project. File count and structure do not reliably indicate intent — only an explicit declaration does.
 
 

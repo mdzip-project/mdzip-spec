@@ -6,7 +6,7 @@ Sample `.mdz` package structures for implementers.
 
 - `minimal/` - smallest valid archive-root contents (only `index.md`).
 - `with-manifest/` - valid package with optional `manifest.json` and nested assets.
-- `invalid/missing-index/` - invalid case: required `index.md` absent.
+- `invalid/missing-index/` - invalid case: manifest declares `entryPoint: "index.md"` but the file is absent (`ERR_ENTRYPOINT_MISSING`).
 - `invalid/bad-entrypoint/` - invalid case: manifest `entryPoint` does not exist.
 - `line-endings-crlf/` - valid compatibility case for consumer CRLF handling.
 

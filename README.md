@@ -2,7 +2,7 @@
 
 Specification for the **MDZip** (`.mdz`) file format.
 
-Current draft release: `v1.0.1-draft` (dated `2026-03-29`).
+Current draft release: `v1.1.0-draft` (dated `2026-04-05`).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 
@@ -18,7 +18,8 @@ The specification covers:
 
 - **File format** - ZIP-based archive structure and encoding requirements
 - **Archive layout** - Required and recommended file organization
-- **Manifest** - Optional `manifest.json` metadata and entry-point override
+- **Manifest** - Optional `manifest.json` metadata, entry-point override, and mode declaration
+- **Modes** - `document` (default) and `project` interpretation modes
 - **Markdown content** - Encoding, dialect guidance, and multi-page support
 - **Assets** - Bundling images and other resources
 - **Linking** - How to reference files within the archive
@@ -31,7 +32,7 @@ The specification covers:
 - [SPEC.md](SPEC.md) - canonical format specification
 - [examples/](examples/README.md) - sample valid and invalid package structures
 - [tests/](tests/README.md) - conformance case catalog and expected behavior
-- [schema/](schema/manifest-1.0.1-draft.schema.json) - versioned JSON Schema companion for manifest validation
+- [schema/](schema/manifest-1.1.0-draft.schema.json) - versioned JSON Schema companion for manifest validation
 - [reference/](reference/README.md) - non-normative notes and rationale
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process
@@ -53,8 +54,8 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    ```json
    {
      "spec": {
-      "name": "mdzip-spec",
-       "version": "1.0.1"
+       "name": "mdzip-spec",
+       "version": "1.1.0"
      },
      "title": "My Document",
      "entryPoint": "index.md"

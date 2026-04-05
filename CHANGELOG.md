@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.0-draft] - 2026-04-05
+
+### Added
+
+- Section 5.7: Mode semantics — defines `document` (default) and `project` interpretation modes for `.mdz` archives.
+  - `document` mode: archive represents a single logical document; entry point resolved via standard discovery algorithm; default when no manifest is present or `mode` is absent.
+  - `project` mode: archive represents a collection of independent Markdown documents; requires explicit `manifest.json` with `"mode": "project"`; consumers MUST NOT flatten files into a single document.
+  - Mode values are case-sensitive and MUST be lowercase.
+  - Consumers MUST NOT infer mode from file count, filenames, or directory structure.
+  - Unrecognized mode values: consumers MUST NOT silently fall back to `document` mode; SHOULD fail with `ERR_MODE_UNSUPPORTED`.
+  - Document-only consumers MAY fall back to `document` mode when encountering `project` mode, provided they emit a clear user-visible warning.
+  - Section 5.7.4: entry point semantics by mode — both modes use the standard discovery algorithm when `entryPoint` is absent.
+  - Section 5.7.6: consumer support levels defined (document-only vs. full-featured).
+- Manifest field `mode` (OPTIONAL): added to schema (Section 6.1) and field definitions table (Section 6.2), positioned before `entryPoint`.
+- Section 6.4: added project mode manifest example.
+- `ERR_MODE_UNSUPPORTED` added to suggested error categories (Section 16.5).
+- Conformance Section 14.1 (producer): added requirement for `project` mode archives to satisfy entry point discovery.
+- Conformance Section 14.2 (consumer): added mode recognition, unrecognized mode, and absent mode rules.
+- Section 3 terminology: added **Mode**, **Document mode**, and **Project mode** definitions.
+- Section 17.1: noted that `document`/`project` mode semantics address the foundational use case previously listed as a future extension.
+- Section 5.3: expanded recommended layouts — existing layout labelled as document mode; added two project mode layout patterns (flat shared assets and per-section assets).
+- Section 16.2 consumer checklist: added mode handling step.
+- Added versioned JSON Schema companion at `schema/manifest-1.1.0-draft.schema.json` with `mode` field as an `enum` constraint enforcing allowed values and lowercase requirement.
+
+### Changed
+
+- Section 8.1: asset placement recommendation changed from an `assets/` wrapper directory to flat type-named directories at the archive root (e.g., `images/`, `styles/`). An `assets/` parent directory remains permitted but is no longer recommended. Additional hierarchy within type directories is recommended when volume warrants it.
+- Section 5.4: added author-facing note clarifying that path constraints are an implementor concern; added rationale explaining why ZIP's permissiveness requires tighter constraints.
+- Updated all path examples and example manifests throughout the spec to reflect the flatter asset layout and current spec version.
+
 ## [1.0.1-draft] - 2026-03-16
 
 ### Changed
