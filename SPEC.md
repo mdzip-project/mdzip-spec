@@ -1,7 +1,7 @@
 # MDZip (.mdz) File Format Specification
 
-**Version:** 1.1.0-draft  
-**Status:** Draft  
+**Version:** 1.1.0  
+**Status:** Final  
 **Date:** 2026-04-05
 
 ---
@@ -309,7 +309,7 @@ The manifest file, when present, **MUST** be named `manifest.json` and placed at
 
 Producer tools **MAY** accept non-JSON authoring inputs (for example, JSON5) as a local convenience, but conforming `.mdz` archives **MUST** contain `manifest.json` serialized as standard JSON per RFC 8259.
 
-A versioned JSON Schema companion for this draft is available at [`schema/manifest-1.1.0-draft.schema.json`](schema/manifest-1.1.0-draft.schema.json). The prose specification remains normative when differences exist.
+A versioned JSON Schema companion for this release is available at [`schema/manifest-1.1.0.schema.json`](schema/manifest-1.1.0.schema.json). The prose specification remains normative when differences exist.
 
 ### 6.1 Schema
 
@@ -570,7 +570,7 @@ Conforming consumers **MUST** resolve relative paths against the path of the ref
 
 Producers and consumers **SHOULD** use the `.mdz` file extension. The proposed MIME type `application/vnd.mdzip` **SHOULD** be used when the format is transmitted over HTTP or identified in metadata.
 
-`application/vnd.mdzip` is currently an unregistered vendor media type in this draft. Until formal registration is completed, implementations **MAY** treat it as provisional for interoperability testing. For broad interoperability, servers **MAY** use `application/zip` or `application/octet-stream` as a fallback until `application/vnd.mdzip` is more widely recognized.
+`application/vnd.mdzip` is currently an unregistered vendor media type in this specification. Until formal registration is completed, implementations **MAY** treat it as provisional for interoperability testing. For broad interoperability, servers **MAY** use `application/zip` or `application/octet-stream` as a fallback until `application/vnd.mdzip` is more widely recognized.
 
 ---
 
@@ -846,7 +846,7 @@ Implementations may expose stable error categories to simplify debugging and cro
 
 To improve deterministic implementation quality, AI prompts should explicitly include:
 
-- the exact target spec version (`1.1.0-draft` or later);
+- the exact target spec version (`1.1.0` or later);
 - whether producer, consumer, or both are being implemented;
 - required conformance scope (minimum MUSTs vs. SHOULDs included);
 - required behavior for ambiguous entry points;
@@ -856,7 +856,7 @@ To improve deterministic implementation quality, AI prompts should explicitly in
 
 ## 17. Future Extensions (Non-Normative)
 
-This section records possible future directions and does not define current conformance requirements for `1.1.0-draft`.
+This section records possible future directions and does not define current conformance requirements for `1.1.0`.
 
 ### 17.1 Manifest-Level Document Collections
 
@@ -902,7 +902,7 @@ For interoperability and conflict avoidance, this state is best treated as consu
 - per-user state separation,
 - non-destructive behavior for read-only archives.
 
-Embedding "last read" data directly inside `.mdz` is not part of this draft and should be avoided unless a future version defines explicit multi-writer and conflict-resolution semantics.
+Embedding "last read" data directly inside `.mdz` is not part of this specification and should be avoided unless a future version defines explicit multi-writer and conflict-resolution semantics.
 
 ### 17.3 Bookmarks
 
@@ -914,7 +914,7 @@ As with resume state, bookmark data is best treated as consumer-local user state
 - bookmark targets that can survive minor content edits where possible,
 - non-destructive behavior for read-only archives.
 
-Embedding bookmark data directly inside `.mdz` is not part of this draft and should be avoided unless a future version defines portable bookmark anchoring and conflict-resolution semantics.
+Embedding bookmark data directly inside `.mdz` is not part of this specification and should be avoided unless a future version defines portable bookmark anchoring and conflict-resolution semantics.
 
 ### 17.4 Extension Design Principles
 

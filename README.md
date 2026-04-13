@@ -2,7 +2,7 @@
 
 Specification for the **MDZip** (`.mdz`) file format.
 
-Current draft release: `v1.1.0-draft` (dated `2026-04-05`).
+Current release: `v1.1.0` (dated `2026-04-05`).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 
@@ -32,7 +32,7 @@ The specification covers:
 - [SPEC.md](SPEC.md) - canonical format specification
 - [examples/](examples/README.md) - sample valid and invalid package structures
 - [tests/](tests/README.md) - conformance case catalog and expected behavior
-- [schema/](schema/manifest-1.1.0-draft.schema.json) - versioned JSON Schema companion for manifest validation
+- [schema/](schema/manifest-1.1.0.schema.json) - versioned JSON Schema companion for manifest validation
 - [reference/](reference/README.md) - non-normative notes and rationale
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process
@@ -69,4 +69,4 @@ See [LICENSE](LICENSE).
 
 ## Contributing
 
-This specification is in draft status. Feedback, questions, and proposals are welcome via this repository's issue tracker.
+Feedback, questions, and proposals are welcome via this repository's issue tracker.

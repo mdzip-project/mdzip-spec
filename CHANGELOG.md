@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [1.1.0-draft] - 2026-04-05
+## [1.1.0] - 2026-04-05
 
 ### Added
 
@@ -24,7 +24,7 @@ All notable changes to this project are documented in this file.
 - Section 17.1: noted that `document`/`project` mode semantics address the foundational use case previously listed as a future extension.
 - Section 5.3: expanded recommended layouts — existing layout labelled as document mode; added two project mode layout patterns (flat shared assets and per-section assets).
 - Section 16.2 consumer checklist: added mode handling step.
-- Added versioned JSON Schema companion at `schema/manifest-1.1.0-draft.schema.json` with `mode` field as an `enum` constraint enforcing allowed values and lowercase requirement.
+- Added versioned JSON Schema companion at `schema/manifest-1.1.0.schema.json` with `mode` field as an `enum` constraint enforcing allowed values and lowercase requirement.
 
 ### Changed
 
