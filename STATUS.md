@@ -1,5 +1,5 @@
-Status: awaiting-test
-Last:   Second review addressed: modes, manifest validation (§6.4), create vs modify, entry-name structure, ZIP rules, link edge cases + fixtures; Python core and Obsidian plugin pass them
+Status: idle
+Last:   Committed + pushed draft/v1.2.0 (7ec6b1c); next: merge to main and tag v1.2.0
 
 Owner to-do (review/commit/release steps): ../planning/owner-todo.md
 

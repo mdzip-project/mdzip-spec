@@ -8,6 +8,8 @@ Sample `.mdz` package structures for implementers.
 - `with-manifest/` - valid package with optional `manifest.json` and nested assets.
 - `invalid/missing-index/` - invalid case: manifest declares `entryPoint: "index.md"` but the file is absent (`ERR_ENTRYPOINT_MISSING`).
 - `invalid/bad-entrypoint/` - invalid case: manifest `entryPoint` does not exist.
+
+The manifests in `with-manifest/` and `invalid/` keep `spec.version` `1.1.0` on purpose: they also show that a consumer for a newer minor version accepts older-minor archives (Section 11.2), and the prebuilt `.mdz` fixtures built from them stay byte-stable across releases.
 - `line-endings-crlf/` - valid compatibility case for consumer CRLF handling.
 - `round-trip/` - producer preservation case: a manifest with unknown fields of every JSON type (top level, nested in known objects, profile-like), `AGENTS.md` at the root, nested and over 24 KB, plus an unknown binary file and a CSV. Prebuilt as `fixtures/round-trip.mdz`; checks in `fixtures/round-trip-expectations.json` (tests `P-004`, `P-005`). Its files are stored with `-text` in `.gitattributes` so checksums don't change on checkout.
 
