@@ -1,0 +1,3 @@
+# Fixture bytes are checked by SHA-256; never convert line endings.
+examples/round-trip/** -text
+*.mdz binary

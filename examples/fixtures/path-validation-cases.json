@@ -22,6 +22,28 @@
     "errorCode": "ERR_PATH_TRAVERSAL"
   },
   {
+    "name": "dot-dot segment in the middle is invalid",
+    "path": "docs/../index.md",
+    "valid": false,
+    "errorCode": "ERR_PATH_TRAVERSAL"
+  },
+  {
+    "name": "trailing dot-dot segment is invalid",
+    "path": "docs/..",
+    "valid": false,
+    "errorCode": "ERR_PATH_TRAVERSAL"
+  },
+  {
+    "name": "dot-dot inside a file name is valid",
+    "path": "notes..md",
+    "valid": true
+  },
+  {
+    "name": "dot-dot inside a folder name is valid",
+    "path": "v1..2/notes.md",
+    "valid": true
+  },
+  {
     "name": "reserved character is invalid",
     "path": "chapter:01.md",
     "valid": false,
@@ -38,5 +60,23 @@
     "path": "bad\u0001name.md",
     "valid": false,
     "errorCode": "ERR_PATH_CONTROL_CHAR"
+  },
+  {
+    "name": "leading dot segment is invalid",
+    "path": "./index.md",
+    "valid": false,
+    "errorCode": "ERR_PATH_INVALID"
+  },
+  {
+    "name": "dot segment in the middle is invalid",
+    "path": "docs/./intro.md",
+    "valid": false,
+    "errorCode": "ERR_PATH_INVALID"
+  },
+  {
+    "name": "empty segment is invalid",
+    "path": "docs//intro.md",
+    "valid": false,
+    "errorCode": "ERR_PATH_INVALID"
   }
 ]

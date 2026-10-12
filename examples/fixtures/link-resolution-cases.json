@@ -1,0 +1,570 @@
+{
+  "description": "Link resolution cases for SPEC Sections 9.3–9.5 (1.2.0-draft). Each case resolves `link` from `from` (a document inside an archive, or a host file) against the shared `host` model. `context` overrides the defaults { hostLocation: true, outsideLinks: true, intoArchiveLinks: true }. Expected kinds: internal (entry in the source archive), host (host file path), archive (entry inside another or the same archive, addressed through the host), url (not a path), unresolved (with a reason: not-found, invalid, unsupported, no-host-location, nested-archive). Reasons are informative; conformance requires only the kind and target.",
+  "host": {
+    "description": "Host filesystem used by every case. \"files\" are ordinary files; \"archives\" are .mdz files with their entries; \"directories\" are real directories (Folder.mdz is a directory, not an archive).",
+    "files": [
+      "MyVault/Notes.md",
+      "MyVault/My Notes.md",
+      "MyVault/References/Design.md",
+      "MyVault/Folder.mdz/readme.md"
+    ],
+    "directories": [
+      "MyVault",
+      "MyVault/References",
+      "MyVault/Folder.mdz"
+    ],
+    "archives": {
+      "MyVault/Project.mdz": {
+        "entries": [
+          "index.md",
+          "chapters/intro.md",
+          "images/logo.png",
+          "chapters/c#-notes.md"
+        ],
+        "entryPoint": "index.md"
+      },
+      "MyVault/Other.mdz": {
+        "entries": [
+          "index.md",
+          "guide.md",
+          "inner.mdz"
+        ],
+        "entryPoint": "index.md"
+      },
+      "MyVault/Upper.MDZ": {
+        "entries": [
+          "index.md"
+        ],
+        "entryPoint": "index.md"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "internal link to a sibling directory",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/intro.md",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/intro.md"
+      }
+    },
+    {
+      "name": "internal link climbing within the archive",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "chapters/intro.md"
+      },
+      "link": "../index.md",
+      "expected": {
+        "kind": "internal",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "internal link with a dot segment",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "chapters/intro.md"
+      },
+      "link": "./../images/logo.png",
+      "expected": {
+        "kind": "internal",
+        "entry": "images/logo.png"
+      }
+    },
+    {
+      "name": "fragment-only link refers to the same document",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "chapters/intro.md"
+      },
+      "link": "#background",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/intro.md",
+        "fragment": "background"
+      }
+    },
+    {
+      "name": "missing internal target is unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/missing.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "internal link is case-sensitive",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "Chapters/intro.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "root document links to a sibling file of the archive",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Notes.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/Notes.md"
+      }
+    },
+    {
+      "name": "nested document needs one more ..",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "chapters/intro.md"
+      },
+      "link": "../../Notes.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/Notes.md"
+      }
+    },
+    {
+      "name": "link into a host subdirectory",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../References/Design.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/References/Design.md"
+      }
+    },
+    {
+      "name": "fragment is kept on a host target",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Notes.md#todo",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/Notes.md",
+        "fragment": "todo"
+      }
+    },
+    {
+      "name": "percent-encoded space is decoded per segment",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../My%20Notes.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/My Notes.md"
+      }
+    },
+    {
+      "name": "encoded dot segments behave like dot segments",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "%2E%2E/Notes.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/Notes.md"
+      }
+    },
+    {
+      "name": "encoded slash cannot create a path step",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "..%2FNotes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "missing host target is unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Missing.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "no host location (opened from bytes) makes outside links unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Notes.md",
+      "context": {
+        "hostLocation": false
+      },
+      "expected": {
+        "kind": "unresolved",
+        "reason": "no-host-location"
+      }
+    },
+    {
+      "name": "consumer without outside-link support treats them as unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Notes.md",
+      "context": {
+        "outsideLinks": false
+      },
+      "expected": {
+        "kind": "unresolved",
+        "reason": "unsupported"
+      }
+    },
+    {
+      "name": "outside links are never clamped into the archive",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../index.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "climbing above the host root is unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../../../Notes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "a real directory named .mdz is an ordinary directory",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Folder.mdz/readme.md",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/Folder.mdz/readme.md"
+      }
+    },
+    {
+      "name": "host note links to a document inside an archive",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/chapters/intro.md",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Project.mdz",
+        "entry": "chapters/intro.md"
+      }
+    },
+    {
+      "name": "host note links to a heading inside an archive document",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/chapters/intro.md#background",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Project.mdz",
+        "entry": "chapters/intro.md",
+        "fragment": "background"
+      }
+    },
+    {
+      "name": "link to the archive itself opens its entry point",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Project.mdz",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "trailing slash on the archive also opens its entry point",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Project.mdz",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "archive extension matches ASCII case-insensitively",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Upper.MDZ/index.md",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Upper.MDZ",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "missing document inside an archive is unresolved",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/chapters/missing.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": ".. above the entered archive root is unresolved",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/../Notes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "one archive links to a document in another archive",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Other.mdz/guide.md",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Other.mdz",
+        "entry": "guide.md"
+      }
+    },
+    {
+      "name": "link back into the same archive equals the internal link",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "chapters/intro.md"
+      },
+      "link": "../../Project.mdz/index.md",
+      "expected": {
+        "kind": "archive",
+        "archive": "MyVault/Project.mdz",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "a second archive boundary is unsupported",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Other.mdz/inner.mdz/index.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "nested-archive"
+      }
+    },
+    {
+      "name": "consumer without into-archive support treats them as unresolved",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "Project.mdz/index.md",
+      "context": {
+        "intoArchiveLinks": false
+      },
+      "expected": {
+        "kind": "unresolved",
+        "reason": "unsupported"
+      }
+    },
+    {
+      "name": "external URL is not resolved as a path",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "https://mdzip.org/spec",
+      "expected": {
+        "kind": "url"
+      }
+    },
+    {
+      "name": "root-relative link is not a valid relative link",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "/Notes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "backslash is not a valid separator",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "..\\Notes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "query-only link refers to the same document",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "?view=print",
+      "expected": {
+        "kind": "internal",
+        "entry": "index.md"
+      }
+    },
+    {
+      "name": "query is removed before resolving",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/intro.md?print=1#background",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/intro.md",
+        "fragment": "background"
+      }
+    },
+    {
+      "name": "a question mark inside the fragment stays in the fragment",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/intro.md#background?text",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/intro.md",
+        "fragment": "background?text"
+      }
+    },
+    {
+      "name": "invalid percent-encoding is unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "%ZZ.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "percent-encoded bytes that are not UTF-8 are unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "%C3%28.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "invalid"
+      }
+    },
+    {
+      "name": "percent-decoding happens once: %252e%252e is a literal name, not ..",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "%252e%252e/Notes.md",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "an encoded # is part of the file name",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/c%23-notes.md",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/c#-notes.md"
+      }
+    },
+    {
+      "name": "an empty segment is ignored",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters//intro.md",
+      "expected": {
+        "kind": "internal",
+        "entry": "chapters/intro.md"
+      }
+    },
+    {
+      "name": "a trailing slash inside an archive names a directory and is unresolved",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "chapters/",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    },
+    {
+      "name": "a trailing slash on a host directory is unresolved",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "References/",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "not-found"
+      }
+    }
+  ]
+}

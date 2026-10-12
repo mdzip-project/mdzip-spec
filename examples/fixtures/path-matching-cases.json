@@ -1,0 +1,56 @@
+[
+  {
+    "name": "identical paths match",
+    "entry": "guide/intro.md",
+    "lookup": "guide/intro.md",
+    "matches": true
+  },
+  {
+    "name": "matching is case-sensitive",
+    "entry": "index.md",
+    "lookup": "Index.md",
+    "matches": false
+  },
+  {
+    "name": "NFD lookup matches NFC entry",
+    "entry": "caf\u00e9.md",
+    "lookup": "cafe\u0301.md",
+    "matches": true,
+    "note": "U+00E9 vs U+0065 U+0301"
+  },
+  {
+    "name": "NFC lookup matches NFD entry",
+    "entry": "cafe\u0301.md",
+    "lookup": "caf\u00e9.md",
+    "matches": true,
+    "note": "entry paths are normalized too"
+  },
+  {
+    "name": "non-Latin script paths match exactly",
+    "entry": "\u6587\u6863/\u4ecb\u7ecd.md",
+    "lookup": "\u6587\u6863/\u4ecb\u7ecd.md",
+    "matches": true,
+    "note": "Chinese path"
+  },
+  {
+    "name": "German sharp s does not match ss",
+    "entry": "stra\u00dfe.md",
+    "lookup": "strasse.md",
+    "matches": false,
+    "note": "no case folding"
+  },
+  {
+    "name": "Greek final sigma does not match medial sigma",
+    "entry": "\u03bb\u03cc\u03b3\u03bf\u03c2.md",
+    "lookup": "\u03bb\u03cc\u03b3\u03bf\u03c3.md",
+    "matches": false,
+    "note": "no case folding"
+  },
+  {
+    "name": "Turkish dotless i does not match i",
+    "entry": "\u0131ndex.md",
+    "lookup": "index.md",
+    "matches": false,
+    "note": "no locale-sensitive case conversion"
+  }
+]

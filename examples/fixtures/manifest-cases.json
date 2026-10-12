@@ -1,0 +1,232 @@
+{
+  "description": "Manifest validation cases (SPEC Section 6.4, 1.2.0-draft). Each case is the raw text of manifest.json (`manifestJson`). `expected.valid: false` names the error in `expected.errorCode`. A valid manifest may list `expected.ignoredFields`: descriptive fields with a wrong type or invalid value that a consumer ignores (warning optional). `expected.values` gives JSON-Pointer values the consumer must read, for example the last of two duplicate members. `expected.duplicateMembers: true` means the consumer should report duplicate member names. `entryPoint` and `mode` are checked here only for their type and value; the archive's entries are not involved (see entrypoint-cases.json).",
+  "cases": [
+    {
+      "name": "empty object is valid",
+      "manifestJson": "{}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "typical producer manifest is valid",
+      "manifestJson": "{\"spec\": {\"name\": \"mdzip-spec\", \"version\": \"1.2.0\"}, \"title\": \"Guide\", \"mode\": \"document\", \"entryPoint\": \"index.md\"}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "not JSON",
+      "manifestJson": "{\"title\": \"Guide\",}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "top-level array",
+      "manifestJson": "[]",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "top-level string",
+      "manifestJson": "\"index.md\"",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "spec is null",
+      "manifestJson": "{\"spec\": null}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "spec is a string",
+      "manifestJson": "{\"spec\": \"1.2.0\"}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "spec.version is not a semantic version",
+      "manifestJson": "{\"spec\": {\"version\": \"banana\"}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "spec.version is a number",
+      "manifestJson": "{\"spec\": {\"version\": 1.2}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "spec without version is valid (baseline 1.x)",
+      "manifestJson": "{\"spec\": {\"name\": \"mdzip-spec\"}}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "newer major version is unsupported",
+      "manifestJson": "{\"spec\": {\"version\": \"2.0.0\"}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_VERSION_UNSUPPORTED"
+      }
+    },
+    {
+      "name": "newer minor version is accepted",
+      "manifestJson": "{\"spec\": {\"version\": \"1.9.0\"}}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "mode is a number",
+      "manifestJson": "{\"mode\": 42}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "mode is null",
+      "manifestJson": "{\"mode\": null}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "unrecognized mode string",
+      "manifestJson": "{\"mode\": \"Project\"}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MODE_UNSUPPORTED"
+      }
+    },
+    {
+      "name": "entryPoint is a number",
+      "manifestJson": "{\"entryPoint\": 42}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_ENTRYPOINT_INVALID"
+      }
+    },
+    {
+      "name": "title with the wrong type is ignored",
+      "manifestJson": "{\"title\": 5}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "title"
+        ]
+      }
+    },
+    {
+      "name": "empty title is ignored",
+      "manifestJson": "{\"title\": \"\"}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "title"
+        ]
+      }
+    },
+    {
+      "name": "author that is not an object is ignored",
+      "manifestJson": "{\"author\": \"Ada\"}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "author"
+        ]
+      }
+    },
+    {
+      "name": "keywords that are not strings are ignored",
+      "manifestJson": "{\"keywords\": [\"a\", 1]}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "keywords"
+        ]
+      }
+    },
+    {
+      "name": "created object without when is ignored",
+      "manifestJson": "{\"created\": {\"by\": {\"name\": \"Ada\"}}}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "created"
+        ]
+      }
+    },
+    {
+      "name": "legacy string timestamp is accepted",
+      "manifestJson": "{\"created\": \"2026-01-01T00:00:00Z\"}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "cover outside the archive is ignored",
+      "manifestJson": "{\"cover\": \"../cover.png\"}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "cover"
+        ]
+      }
+    },
+    {
+      "name": "cover with a leading ./ is valid",
+      "manifestJson": "{\"cover\": \"./images/cover.png\"}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "unknown fields are not validated",
+      "manifestJson": "{\"x-tool\": null, \"custom\": [1, {\"a\": true}]}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "duplicate member names: last wins, and should be reported",
+      "manifestJson": "{\"title\": \"First\", \"title\": \"Second\"}",
+      "expected": {
+        "valid": true,
+        "duplicateMembers": true,
+        "values": {
+          "/title": "Second"
+        }
+      }
+    },
+    {
+      "name": "duplicate member names inside an object",
+      "manifestJson": "{\"spec\": {\"version\": \"1.0.0\", \"version\": \"1.2.0\"}}",
+      "expected": {
+        "valid": true,
+        "duplicateMembers": true,
+        "values": {
+          "/spec/version": "1.2.0"
+        }
+      }
+    }
+  ]
+}

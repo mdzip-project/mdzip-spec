@@ -2,7 +2,7 @@
 
 Specification for the **MDZip** (`.mdz`) file format.
 
-Current release: `v1.1.0` (dated `2026-04-05`).
+Current release: `v1.1.0` (dated `2026-04-05`). Draft in progress: `v1.2.0-draft` — see [CHANGELOG.md](CHANGELOG.md).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 
@@ -18,7 +18,7 @@ The specification covers:
 
 - **File format** - ZIP-based archive structure and encoding requirements
 - **Archive layout** - Required and recommended file organization
-- **Manifest** - Optional `manifest.json` metadata, entry-point override, and mode declaration
+- **Manifest** - `manifest.json` metadata, entry point, and mode declaration (written by producers, never required by consumers)
 - **Modes** - `document` (default) and `project` interpretation modes
 - **Markdown content** - Encoding, dialect guidance, and multi-page support
 - **Assets** - Bundling images and other resources
@@ -32,7 +32,7 @@ The specification covers:
 - [SPEC.md](SPEC.md) - canonical format specification
 - [examples/](examples/README.md) - sample valid and invalid package structures
 - [tests/](tests/README.md) - conformance case catalog and expected behavior
-- [schema/](schema/manifest-1.1.0.schema.json) - versioned JSON Schema companion for manifest validation
+- [schema/](schema/manifest-1.2.0.schema.json) - versioned JSON Schema companion for manifest validation
 - [reference/](reference/README.md) - non-normative notes and rationale
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process

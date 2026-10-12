@@ -1,0 +1,78 @@
+{
+  "description": "Whole-archive entry name checks (SPEC Section 5.4, 1.2.0-draft). `entries` lists stored names in order; a name ending in `/` is a directory entry. An archive is valid when no two entries are equal after NFC normalization (ERR_DUPLICATE_PATH) and no file's path is also a directory of another entry (ERR_PATH_CONFLICT). Non-ASCII names are written as JSON \\u escapes so normalization differences stay visible. Names that differ only in case are valid (SHOULD NOT, not MUST NOT); consumers may warn.",
+  "cases": [
+    {
+      "name": "distinct files are valid",
+      "entries": [
+        "index.md",
+        "docs/intro.md",
+        "images/logo.png"
+      ],
+      "valid": true
+    },
+    {
+      "name": "optional directory entries are valid",
+      "entries": [
+        "docs/",
+        "docs/intro.md",
+        "index.md"
+      ],
+      "valid": true
+    },
+    {
+      "name": "NFC duplicates are rejected",
+      "entries": [
+        "caf\u00e9.md",
+        "cafe\u0301.md"
+      ],
+      "valid": false,
+      "errorCode": "ERR_DUPLICATE_PATH"
+    },
+    {
+      "name": "names differing only in case are valid",
+      "entries": [
+        "Index.md",
+        "index.md"
+      ],
+      "valid": true,
+      "note": "Section 5.4 SHOULD NOT; consumers may warn about extraction collisions (Section 13.1)."
+    },
+    {
+      "name": "a file that is also a directory is rejected",
+      "entries": [
+        "docs",
+        "docs/intro.md"
+      ],
+      "valid": false,
+      "errorCode": "ERR_PATH_CONFLICT"
+    },
+    {
+      "name": "a file that is also a directory entry is rejected",
+      "entries": [
+        "docs",
+        "docs/"
+      ],
+      "valid": false,
+      "errorCode": "ERR_PATH_CONFLICT"
+    },
+    {
+      "name": "a file and a directory equal after NFC are rejected",
+      "entries": [
+        "caf\u00e9",
+        "cafe\u0301/menu.md"
+      ],
+      "valid": false,
+      "errorCode": "ERR_PATH_CONFLICT"
+    },
+    {
+      "name": "a nested file that is also a directory is rejected",
+      "entries": [
+        "a/b",
+        "a/b/c.md",
+        "index.md"
+      ],
+      "valid": false,
+      "errorCode": "ERR_PATH_CONFLICT"
+    }
+  ]
+}

@@ -46,5 +46,276 @@
     ],
     "manifest": null,
     "expectedEntryPoint": null
+  },
+  {
+    "name": "support files are set aside: content file plus README",
+    "files": [
+      "notes.md",
+      "README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "notes.md"
+  },
+  {
+    "name": "support files are set aside: content file plus AGENTS",
+    "files": [
+      "notes.md",
+      "AGENTS.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "notes.md"
+  },
+  {
+    "name": "all support file names are set aside",
+    "files": [
+      "notes.markdown",
+      "LICENSE.md",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "AGENTS.md",
+      "README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "notes.markdown"
+  },
+  {
+    "name": "support file names match case-insensitively, either extension",
+    "files": [
+      "notes.md",
+      "readme.MD",
+      "Agents.markdown"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "notes.md"
+  },
+  {
+    "name": "only root-level support files are set aside; subdirectories are ignored",
+    "files": [
+      "notes.md",
+      "docs/README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "notes.md"
+  },
+  {
+    "name": "a lone support file is used as the entry point",
+    "files": [
+      "AGENTS.md",
+      "images/cover.png"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "AGENTS.md"
+  },
+  {
+    "name": "two support files and no content file are ambiguous",
+    "files": [
+      "README.md",
+      "AGENTS.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": null
+  },
+  {
+    "name": "names that only resemble support files are content files",
+    "files": [
+      "notes.md",
+      "README-draft.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": null
+  },
+  {
+    "name": "two content files stay ambiguous even with a support file",
+    "files": [
+      "a.md",
+      "b.md",
+      "README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": null
+  },
+  {
+    "name": "index.md wins over support files",
+    "files": [
+      "index.md",
+      "AGENTS.md",
+      "README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "index.md"
+  },
+  {
+    "name": "manifest entryPoint may name a support file",
+    "files": [
+      "README.md",
+      "notes.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "README.md"
+    },
+    "expectedEntryPoint": "README.md"
+  },
+  {
+    "name": "missing manifest entryPoint does not fall back to index.md",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "missing.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_MISSING"
+  },
+  {
+    "name": "missing manifest entryPoint does not fall back to a support file",
+    "files": [
+      "README.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "index.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_MISSING"
+  },
+  {
+    "name": "entryPoint that is not a string is invalid",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": null,
+    "manifestJson": "{\"entryPoint\":42}",
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "empty entryPoint is invalid",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": ""
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "absolute entryPoint is invalid",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "/index.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "entryPoint with a traversal segment is invalid",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "../index.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "entryPoint with a backslash is invalid",
+    "files": [
+      "docs/a.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "docs\\a.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "entryPoint naming an existing non-Markdown file is invalid",
+    "files": [
+      "index.md",
+      "images/cover.png",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "images/cover.png"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "entryPoint naming a directory is invalid",
+    "files": [
+      "chapters/start.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "chapters/"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_INVALID"
+  },
+  {
+    "name": "a single leading ./ in entryPoint is removed",
+    "files": [
+      "start.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "./start.md"
+    },
+    "expectedEntryPoint": "start.md"
+  },
+  {
+    "name": "entryPoint differing only in case is missing, not matched",
+    "files": [
+      "index.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "Index.md"
+    },
+    "expectedEntryPoint": null,
+    "expectedError": "ERR_ENTRYPOINT_MISSING"
+  },
+  {
+    "name": "entryPoint in NFD matches an NFC entry (resolves to the entry path)",
+    "files": [
+      "caf\u00e9.md",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "cafe\u0301.md"
+    },
+    "expectedEntryPoint": "caf\u00e9.md"
+  },
+  {
+    "name": "entryPoint extension matches ASCII case-insensitively",
+    "files": [
+      "NOTES.MD",
+      "manifest.json"
+    ],
+    "manifest": {
+      "entryPoint": "NOTES.MD"
+    },
+    "expectedEntryPoint": "NOTES.MD"
+  },
+  {
+    "name": "upper-case extension still counts as Markdown in rule 3",
+    "files": [
+      "NOTES.MD",
+      "README.md"
+    ],
+    "manifest": null,
+    "expectedEntryPoint": "NOTES.MD"
   }
 ]

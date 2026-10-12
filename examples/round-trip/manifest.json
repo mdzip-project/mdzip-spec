@@ -1,0 +1,65 @@
+{
+  "spec": {
+    "name": "mdzip-spec",
+    "version": "1.2.0",
+    "x-negotiated": [
+      "1.1.0",
+      "1.2.0"
+    ]
+  },
+  "producer": {
+    "application": {
+      "name": "fixture-generator",
+      "version": "1.0.0",
+      "x-build": {
+        "channel": "test",
+        "number": 42
+      }
+    }
+  },
+  "author": {
+    "name": "Fixture Author",
+    "x-orcid": null
+  },
+  "title": "Round-trip preservation fixture",
+  "mode": "document",
+  "entryPoint": "index.md",
+  "language": "en",
+  "x-unknown-string": "keep me",
+  "x-unknown-number": 3.5,
+  "x-unknown-boolean": false,
+  "x-unknown-null": null,
+  "x-unknown-array": [
+    1,
+    "two",
+    true,
+    null,
+    {
+      "three": 3
+    }
+  ],
+  "x-unknown-object": {
+    "nested": {
+      "deeper": [
+        {
+          "a": 1
+        },
+        {
+          "b": [
+            false,
+            null
+          ]
+        }
+      ]
+    },
+    "empty": {},
+    "emptyList": []
+  },
+  "profiles": [
+    {
+      "id": "https://example.com/profiles/report",
+      "version": "0.1.0",
+      "x-hint": "simulates a future field"
+    }
+  ]
+}
