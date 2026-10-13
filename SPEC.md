@@ -43,9 +43,9 @@ This specification follows established standards patterns by using RFC 2119 norm
 ### Goals
 
 - Provide a simple, open, and inspectable container format for Markdown documents.
-- Ensure documents and all referenced assets travel together as a single unit.
+- Let documents and the resources they use travel together as a single unit.
 - Support multiple Markdown pages/sections within a single archive.
-- Be renderable by any tool that understands ZIP extraction and standard Markdown.
+- Stay readable and inspectable with any tool that understands ZIP and Markdown, even one that knows nothing about MDZip (it may not know the entry point, mode or extensions, but the content is never locked away).
 - Remain human-inspectable using any standard ZIP utility.
 
 ### Non-Goals
@@ -67,7 +67,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | **Entry point** | The primary Markdown file a reader or tool opens first. |
 | **Manifest** | The `manifest.json` file at the root of the archive describing document metadata and entry-point overrides. Optional for archive validity; conforming producers always write one (see [Section 14.1](#141-conforming-producer)). |
 | **Support file** | A root-level Markdown file that describes or accompanies the archive rather than being document content: `README`, `AGENTS`, `LICENSE`, `CHANGELOG`, or `CONTRIBUTING` (see [Section 5.5](#55-entry-point-discovery)). |
-| **Asset** | Any non-Markdown file referenced by a Markdown content file (e.g., images, stylesheets). |
+| **Asset** | Any non-Markdown file in the archive that the archive uses: referenced by a Markdown file (images, stylesheets), by the manifest (such as `cover`), or by an extension or profile the archive declares (schemas, data files, templates). Also called a *resource*. |
 | **Conforming producer** | Software that writes `.mdz` files — creating new archives or modifying existing ones — according to this specification. |
 | **Conforming consumer** | Software that reads and/or processes `.mdz` files according to this specification. |
 | **Mode** | The declared interpretation intent of an archive's contents, specified via `manifest.mode`. Controls how consumers render and navigate content. |
@@ -89,6 +89,7 @@ Requirements:
 - File path separators inside the archive **MUST** be forward slashes (`/`).
 - Each entry **MUST** be stored without compression (method 0) or compressed with DEFLATE (method 8). Conforming consumers **MUST** support both methods, and **MAY** reject an archive that uses any other method (`ERR_ZIP_INVALID`).
 - The archive **MUST NOT** use password protection or encryption.
+- Every entry **MUST** be a regular file or a directory. Producers **MUST NOT** write symbolic links or other special files, such as an entry whose external file attributes give a Unix file type of symbolic link (`S_IFLNK`). See [Section 13.1](#131-archive-handling) for how consumers treat them.
 - Line endings: producers **SHOULD** write LF (`\n`) in Markdown files and `manifest.json` that they create or modify, and consumers **MUST** accept both LF and CRLF (`\r\n`). See [Section 12.2](#122-line-endings).
 
 ---
@@ -421,7 +422,7 @@ A versioned JSON Schema companion for this release is available at [`schema/mani
   "description": "<short description>",
   "version": "<document version>",
   "created": {
-    "when": "<ISO 8601 datetime>",
+    "when": "<RFC 3339 datetime>",
     "by": {
       "name": "<creator name>",
       "email": "<creator email>",
@@ -429,7 +430,7 @@ A versioned JSON Schema companion for this release is available at [`schema/mani
     }
   },
   "modified": {
-    "when": "<ISO 8601 datetime>",
+    "when": "<RFC 3339 datetime>",
     "by": {
       "name": "<modifier name>",
       "email": "<modifier email>",
@@ -444,8 +445,10 @@ A versioned JSON Schema companion for this release is available at [`schema/mani
 
 `created` and `modified` each take one of two forms:
 
-- an object with a required `when` (an ISO 8601 datetime) and an optional `by` — the current form, which producers **SHOULD** write; or
-- a plain ISO 8601 datetime string — the legacy form from draft `1.0.x`.
+- an object with a required `when` and an optional `by` — the current form, which producers **SHOULD** write; or
+- a plain datetime string — the legacy form from draft `1.0.x`.
+
+Datetimes in both forms **MUST** use the [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) `date-time` format, the profile of ISO 8601 used by JSON Schema — for example `2026-03-08T14:30:00Z` or `2026-03-08T09:30:00-05:00`. A value in another ISO 8601 form is invalid and, like other descriptive fields, ignored ([Section 6.4](#64-manifest-validation)).
 
 Consumers **MUST** accept both forms, whatever the archive's `spec.version`, including when it has none.
 
@@ -475,17 +478,17 @@ Consumers **MUST** accept both forms, whatever the archive's `spec.version`, inc
 | `title` | string | OPTIONAL | The human-readable title of the document. If present, it **MUST NOT** be empty. If omitted, consumers **SHOULD** derive a display title from available context (for example, the entry-point, filename or first heading). Conforming producers **SHOULD** include it. |
 | `mode` | string | OPTIONAL | The interpretation mode of the archive. Allowed values: `"document"` (default), `"project"`. Values are case-sensitive and MUST be lowercase. If absent, consumers MUST assume `"document"`. If present with an unrecognized value (including incorrect casing such as `"Document"` or `"PROJECT"`), consumers MUST NOT silently fall back to `document` mode. MUST be `"project"` when the archive is a collection of independent documents ([Section 5.7.3](#573-project-mode)); a single publication split across several files is `"document"`. Conforming producers **SHOULD** include it explicitly, including `"document"`. See [Section 5.7](#57-mode-semantics). |
 | `entryPoint` | string | CONDITIONALLY REQUIRED | Path to the primary Markdown file, relative to the archive root (e.g., `"chapters/start.md"`). **MUST** be a valid entry point path as defined in [Section 5.5](#55-entry-point-discovery) (a relative `.md`/`.markdown` file path satisfying Section 5.4), and the referenced file **MUST** exist in the archive, matched as described in [Section 5.4.1](#541-path-matching). Consumers report a malformed value as `ERR_ENTRYPOINT_INVALID` and a valid but absent one as `ERR_ENTRYPOINT_MISSING`. **REQUIRED** when `manifest.json` is emitted by a conforming producer. If omitted, consumers apply the entry point discovery algorithm defined in [Section 5.5](#55-entry-point-discovery). |
-| `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). Defaults to `"en"` if omitted. |
+| `language` | string | OPTIONAL | The natural language of the document as a [BCP 47](https://www.rfc-editor.org/rfc/rfc5646) language tag (e.g., `"en"`, `"fr-CA"`). If omitted, the language is unspecified: consumers **MAY** fall back to a default of their choice, such as the user's interface language or `"en"`, but **SHOULD NOT** state it as the document's language (for example, when exposing it to assistive technology). |
 | `description` | string | OPTIONAL | A short plain-text description of the document. |
 | `version` | string | OPTIONAL | The version of the document itself (not the spec version). **SHOULD** follow Semantic Versioning. |
-| `created` | object or string | OPTIONAL | Creation metadata: an object with `when` (current form) or an ISO 8601 string (legacy draft `1.0.x` form); consumers **MUST** accept both (Section 6.1). |
-| `created.when` | string | CONDITIONALLY REQUIRED | Required when `created` is an object. The creation datetime in ISO 8601 format. |
+| `created` | object or string | OPTIONAL | Creation metadata: an object with `when` (current form) or an RFC 3339 datetime string (legacy draft `1.0.x` form); consumers **MUST** accept both (Section 6.1). |
+| `created.when` | string | CONDITIONALLY REQUIRED | Required when `created` is an object. The creation datetime, in RFC 3339 `date-time` format. |
 | `created.by` | object | OPTIONAL | Creator identity metadata when known and appropriate to disclose. |
 | `created.by.name` | string | OPTIONAL | Creator display name. |
 | `created.by.email` | string | OPTIONAL | Creator contact address. |
 | `created.by.url` | string | OPTIONAL | Creator website/profile URL. |
-| `modified` | object or string | OPTIONAL | Last-modified metadata: an object with `when` (current form) or an ISO 8601 string (legacy draft `1.0.x` form); consumers **MUST** accept both (Section 6.1). |
-| `modified.when` | string | CONDITIONALLY REQUIRED | Required when `modified` is an object. The last-modified datetime in ISO 8601 format. |
+| `modified` | object or string | OPTIONAL | Last-modified metadata: an object with `when` (current form) or an RFC 3339 datetime string (legacy draft `1.0.x` form); consumers **MUST** accept both (Section 6.1). |
+| `modified.when` | string | CONDITIONALLY REQUIRED | Required when `modified` is an object. The last-modified datetime, in RFC 3339 `date-time` format. |
 | `modified.by` | object | OPTIONAL | Modifier identity metadata when known and appropriate to disclose. |
 | `modified.by.name` | string | OPTIONAL | Modifier display name. |
 | `modified.by.email` | string | OPTIONAL | Modifier contact address. |
@@ -620,7 +623,7 @@ An `.mdz` archive **MAY** contain multiple Markdown files, allowing a document t
 
 ## 8. Asset Files
 
-Asset files are any non-Markdown files bundled in the archive, such as images, stylesheets, fonts, or data files.
+Asset files are the non-Markdown files the archive uses (see the definition in [Section 3](#3-terminology)), such as images, stylesheets, fonts, data files, schemas or templates. A file can be used without any Markdown link to it — a `cover` image, or a data file read by an extension.
 
 ### 8.1 Placement
 
@@ -628,11 +631,11 @@ Assets **SHOULD** be organized in named subdirectories at the archive root, grou
 
 ### 8.2 Allowed Asset Types
 
-There is no restriction on asset file types. However, producers **SHOULD** only include assets that are directly referenced by the document's Markdown content.
+There is no restriction on asset file types.
 
 ### 8.3 Unused Assets
 
-Conforming producers **SHOULD NOT** include asset files that are not referenced by any Markdown file in the archive.
+Conforming producers **SHOULD NOT** include files the archive does not use: files that nothing in the archive references and that no declared extension needs, such as leftovers from an editor or build. A file that is not linked from Markdown is not unused for that reason alone. Producers modifying an archive keep files they don't recognize ([Section 14.1](#141-conforming-producer)); deciding what is unused is a creation-time choice.
 
 ---
 
@@ -657,6 +660,12 @@ Relative links **MAY** include `../` segments. A link whose resolved path stays 
 
 Links to external URLs (e.g., `https://example.com`) are permitted. Conforming consumers **MAY** choose to warn users before following external links. A destination with a URL scheme (such as `https:` or `mailto:`) is an external URL and is not resolved as a path.
 
+A document can also load an external resource automatically, such as an image written `![logo](https://example.com/logo.png)`. Fetching it tells that server the document was opened, and the archive is no longer self-contained ([Section 1](#1-overview)): the resource can change or disappear, and it does not load offline.
+
+- Consumers **SHOULD** let the user turn off automatic loading of external resources.
+- Consumers **SHOULD NOT** automatically load external resources over unencrypted `http:`.
+- Producers and validators **MAY** report external resources as informational notices, as for links outside the archive ([Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)), not as errors.
+
 ### 9.3 Path Resolution
 
 This section and Sections 9.4–9.5 apply to **standard Markdown link destinations**: inline and reference-style links and images (`[text](path)`, `![alt](path)`, `[text][ref]` with `[ref]: path`) and the `href` and `src` attributes of HTML elements embedded in Markdown. Other link syntaxes, such as wikilinks, are covered by [Section 9.7](#97-other-link-syntaxes).
@@ -672,6 +681,8 @@ Conforming consumers **MUST** resolve relative paths against the path of the ref
 7. If a `..` step would move above the archive root, the link leaves the archive and is resolved as described in [Section 9.4](#94-links-outside-the-archive-optional).
 
 The base is always the referencing file's location: an HTML `<base>` element in a document does not change how its links resolve.
+
+This specification does not define how a heading becomes an anchor. Markdown dialects differ (`## My Heading` is `#my-heading` on GitHub and `#My Heading` in Obsidian), so whether a fragment matches a heading depends on the consumer's dialect ([Section 12.4](#124-markdown-dialect-portability)). A fragment that matches no anchor still leaves the link resolved to its target document.
 
 Link resolution is separate from archive entry path validation. The archive's own entry names **MUST** still satisfy [Section 5.4](#54-path-constraints) — an entry named `../escape.md` remains invalid — and nothing in this section relaxes the extraction rules in [Section 13.1](#131-archive-handling).
 
@@ -695,10 +706,10 @@ Rules:
 - Support is **OPTIONAL**. A consumer that does not support links outside the archive **MUST** treat them as unresolved. Supporting them does not affect any other conformance requirement.
 - A consumer that supports them resolves the remaining segments against the directory containing the `.mdz` file, using the host's normal path and filesystem rules. Path matching on the host follows the host filesystem (which may ignore case or normalize Unicode); [Section 5.4.1](#541-path-matching) governs matching only inside archives.
 - If the consumer has no host filesystem location for the archive — for example, the archive was opened from bytes in a web browser, an email attachment or a download stream — links outside the archive **MUST** be treated as unresolved, not mapped to a guessed location.
-- If the target does not exist or the host denies access, the link is unresolved.
+- If the target is outside the consumer's trust boundary ([Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)), does not exist, or the host denies access, the link is unresolved.
 - If a segment of the remaining path names an MDZip archive, the link enters that archive and is resolved as described in [Section 9.5](#95-links-into-archives-optional).
 
-These links apply to any link destination — documents, images and other assets — but a consumer **MAY** support them for navigation only and treat automatically loaded resources (such as `![logo](../logo.png)`) as unresolved, subject to its security policy ([Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)).
+These links apply to any link destination — documents, images and other assets — but resources that a document loads automatically (such as `![logo](../logo.png)`) are unresolved by default ([Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)).
 
 ### 9.5 Links Into Archives (Optional)
 
@@ -720,13 +731,16 @@ Rules:
 - A link that enters the archive containing the referencing file (for example, `../Project.mdz/chapters/intro.md` from inside `Project.mdz`) refers to the same entry as the corresponding internal link.
 - Links into archives use ordinary relative Markdown links; this specification defines no URI scheme for them. Renderers that do not support them will show these links as broken.
 
-When a consumer needs a stable identifier for a document inside an archive, for example to build backlinks or a link graph, it **SHOULD** use the archive's host path followed by the entry path, such as `MyVault/Project.mdz/chapters/intro.md`.
+When a consumer needs an identifier for a document inside an archive, for example to build backlinks or a link graph, it **SHOULD** use the archive's host path followed by the entry path, such as `MyVault/Project.mdz/chapters/intro.md`. This identifies the document at its current location on the host; it changes when the archive or its folder is moved or renamed.
 
 ### 9.6 Security and Portability of Links Beyond an Archive
 
+An archive may come from anyone, so a link that leaves it is a request, written by the archive's author, to reach files on the reader's machine. The risk is disclosure as well as modification: an untrusted archive can try to display or reveal local files, for example with `![](../../.ssh/id_rsa)`.
+
 - Resolving or following a link outside an archive or into another archive is **read-only**. It **MUST NOT** extract files to the host filesystem, write to it, or modify any archive.
-- *Navigation* (the user follows a link) and *automatic loading* (the consumer fetches a resource the document displays, such as an image or stylesheet) are different uses. A consumer **MAY** support either or both, and **SHOULD** apply a stricter policy to automatic loading, for example asking before loading resources from outside the archive.
-- Consumers **MUST** apply the host application's normal access controls and trust boundaries (for example, an editor's workspace or vault permissions) when resolving these links, and **SHOULD** warn before opening a target outside the host's current workspace or vault.
+- **Trust boundary.** A consumer that supports these links **MUST** limit them to a *trust boundary*: a location the user has chosen to trust, such as the workspace or vault an editor has open. A target outside it **MUST** be treated as unresolved, whether or not it exists, unless the user explicitly allows access to that target (for example by confirming a prompt that names it). A consumer with no such location, such as a viewer opening a single file, has no trusted targets outside the archive. The host's own access controls apply as well.
+- **Navigation and automatic loading.** *Navigation* (the user follows a link) and *automatic loading* (the consumer fetches a resource the document displays, such as an image, stylesheet or embedded file) are different uses. Automatic loading from outside the archive **MUST** be off by default. A consumer **MAY** enable it for targets inside the trust boundary when the user or the host's configuration asks for it, and **MUST NOT** enable it for targets outside the boundary.
+- Consumers **SHOULD** show the user where a navigation link outside the archive leads before opening it, unless the target is inside the trust boundary.
 - Archives that rely on links outside the archive are **not self-contained**: those links resolve only while the archive sits next to the files it references, and break when the archive is moved, shared or opened in a browser. Authors opt into this deliberately; content that must travel with the document belongs inside the archive.
 - Producers **MUST NOT** rewrite links outside the archive into internal links, or vice versa, without the author's request. Validators and producers **SHOULD** report links outside the archive as informational notices (for example, "this archive links to 3 files outside it"), not as errors.
 
@@ -766,6 +780,8 @@ This specification uses [Semantic Versioning 2.0.0](https://semver.org/):
 - **Major version** increments indicate breaking, backwards-incompatible changes to the format.
 - **Minor version** increments indicate backwards-compatible additions or clarifications.
 - **Patch version** increments indicate corrections or editorial changes with no impact on format compatibility.
+
+Compatibility is defined in terms of archives, not implementations. Within a major version, an archive valid under an earlier minor version stays readable by a consumer of a later one, and an archive written to a later minor version stays usable by an earlier consumer, which ignores what it doesn't recognize. A minor version can add requirements on implementations (for example, 1.2.0 requires producers to write a manifest), so software that conforms to one minor version does not automatically conform to the next.
 
 ### 11.2 Manifest `spec.version` Field
 
@@ -827,7 +843,7 @@ Conforming consumers and producers should treat `.mdz` content as potentially un
 - Consumers **MUST** reject archive entries whose paths would resolve outside the archive root after normalization (e.g., absolute paths or relative paths that escape the root), and **MUST NOT** write any file outside the intended destination when extracting. This concerns entry names inside the ZIP; Markdown links that point outside the archive are resolved separately and never trigger extraction ([Section 9.4](#94-links-outside-the-archive-optional), [Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)).
 - Entries whose paths violate [Section 5.4](#54-path-constraints) are non-conforming. Consumers **MUST NOT** extract them under their stored names, and **MUST NOT** silently rename them or resolve a link to a renamed copy, since renaming changes an entry's identity and can create new collisions. Consumers **SHOULD** reject such an archive (`ERR_PATH_INVALID`); they **MAY** offer an explicit recovery, such as skipping the entries or extracting them under names the user approves.
 - Consumers **SHOULD** enforce limits on extracted entry count, total uncompressed bytes, and compression ratio to mitigate ZIP bomb attacks.
-- Consumers **SHOULD** ignore or safely handle symbolic links and hard links if exposed by the ZIP library.
+- Consumers **MUST NOT** follow a symbolic link entry ([Section 4](#4-file-format)): they **MUST NOT** create it as a link when extracting, and **MUST NOT** resolve a path or a Markdown link through it, even when its target lies inside the archive. They **SHOULD** report it, and **MAY** skip it or read it as an ordinary file whose content is the stored target text. The same applies to hard links and other special files if the ZIP library exposes them.
 - Consumers **MUST NOT** choose between two entries whose paths are equal after NFC normalization, or between a file and a directory with the same path ([Section 5.4](#54-path-constraints)). They **SHOULD** reject the archive with `ERR_DUPLICATE_PATH` or `ERR_PATH_CONFLICT` respectively.
 - Consumers extracting to a filesystem that is case-insensitive or normalizes Unicode **SHOULD** detect entries that would collide there and report them, rather than letting one silently overwrite another.
 
@@ -835,12 +851,13 @@ Conforming consumers and producers should treat `.mdz` content as potentially un
 
 - Consumers **MUST NOT** execute scripts or binaries from `.mdz` content as part of normal rendering.
 - Consumers **SHOULD** warn before opening external URLs found in document links.
+- Consumers **SHOULD** let users turn off automatic loading of external resources such as remote images, which reveals to their servers that the document was opened ([Section 9.2](#92-external-links)).
 - Consumers **SHOULD** apply implementation-specific size/time limits while parsing large Markdown or metadata files.
 
 ### 13.3 Producer Guidance
 
 - Producers **SHOULD NOT** include credentials, private keys, or other secrets in archive content.
-- Producers **SHOULD** include only assets required for rendering the document.
+- Producers **SHOULD** include only files the archive uses ([Section 8.3](#83-unused-assets)), so that unrelated local files are not shared by accident.
 
 ---
 
@@ -880,6 +897,8 @@ A producer that **modifies** an existing archive (for example, adding an `AGENTS
 
 Saving an existing archive that has no manifest without adding one is therefore conforming, though not recommended (item 2 above); a creation always writes one.
 
+Conformance is a property of the archive a producer writes, not of the operation alone. A modification **MUST NOT** introduce a violation of [Section 4](#4-file-format), [Section 5.4](#54-path-constraints) or [Section 6](#6-manifest-file). An archive that already violates them (for example, with an entry compressed by an unsupported method, or an invalid name opened through an explicit recovery, [Section 13.1](#131-archive-handling)) stays non-conforming when saved unless the violation is repaired. A producer that saves such an archive **MUST** either repair it with the user's agreement — for example by recompressing the entry with DEFLATE — or tell the user that the saved archive is still non-conforming. It **MUST NOT** repair it silently by dropping or renaming entries ([Section 13.1](#131-archive-handling)).
+
 Archives created by producers targeting earlier versions of this specification, which might not include a manifest, remain valid; consumers handle them as described in [Section 14.2](#142-conforming-consumer).
 
 ### 14.2 Conforming Consumer
@@ -899,7 +918,13 @@ A conforming consumer is any software that reads and/or processes `.mdz` files. 
 11. **MUST** treat links outside the archive and links into archives as unresolved unless it supports them; when it does, **MUST** follow [Sections 9.4–9.6](#94-links-outside-the-archive-optional), including treating them as unresolved when the archive has no host filesystem location. **MUST NOT** resolve such a link to a different target, such as a file inside the archive.
 12. **MUST** accept text files that use LF (`\n`) or CRLF (`\r\n`) line endings.
 13. If `spec.version` is present, **MUST** reject files where the manifest `spec.version` major version exceeds the consumer's supported major version.
-14. **MUST** accept both forms of `created` and `modified` (object with required `when`, or a legacy ISO 8601 string), whatever the archive's `spec.version` ([Section 6.1](#61-schema)).
+14. **MUST** accept both forms of `created` and `modified` (object with required `when`, or a legacy RFC 3339 datetime string), whatever the archive's `spec.version` ([Section 6.1](#61-schema)).
+
+### 14.3 Conformance Fixtures
+
+This repository publishes machine-readable conformance fixtures in [`examples/fixtures/`](examples/fixtures/README.md), and the tests that use them in [`tests/README.md`](tests/README.md). Implementations **SHOULD** run them, pinned to a released tag of this specification.
+
+The fixtures are non-normative. They illustrate the requirements in this document and do not add to them. When a fixture and the prose disagree, the prose governs and the fixture is a defect to report. Passing every fixture does not by itself make an implementation conforming.
 
 ---
 
@@ -1012,7 +1037,7 @@ When opening a `.mdz` archive, a consumer can follow this sequence:
 2. Enumerate entries and validate them against [Section 5.4](#54-path-constraints): no leading `/`, no empty, `.` or `..` segments, no reserved or control characters, no NFC duplicates, and no file that is also a directory. Reject rather than rename ([Section 13.1](#131-archive-handling)).
 3. Parse and validate `manifest.json` if present ([Section 6.4](#64-manifest-validation)): unreadable manifests and invalid critical fields are errors, invalid descriptive fields are ignored, unknown fields are kept. Do not reject the archive if it has no manifest.
 4. Check `manifest.mode`: apply a supported mode per [Section 5.7](#57-mode-semantics); default to `document` if absent; for a recognized but unsupported mode, fail or fall back with a visible warning; fail with `ERR_MODE_UNSUPPORTED` if unrecognized.
-5. Accept `created` and `modified` in either form (object with required `when`, or legacy ISO 8601 string).
+5. Accept `created` and `modified` in either form (object with required `when`, or legacy RFC 3339 datetime string).
 6. If manifest `cover` is invalid or references a missing file, ignore `cover` and optionally warn.
 7. Resolve primary Markdown file via [Section 5.5](#55-entry-point-discovery):
    - manifest `entryPoint` is not a valid entry point path: stop with `ERR_ENTRYPOINT_INVALID`, or warn visibly before recovering with rules 2–4;
@@ -1020,7 +1045,7 @@ When opening a `.mdz` archive, a consumer can follow this sequence:
    - manifest `entryPoint` matches no entry: stop with `ERR_ENTRYPOINT_MISSING` (optionally naming a case-only near match), or warn visibly before recovering with rules 2–4;
    - no `entryPoint`: apply rules 2–4, setting aside support files (`README`, `AGENTS`, `LICENSE`, `CHANGELOG`, `CONTRIBUTING`) when counting root-level Markdown files.
 8. Parse Markdown with UTF-8 decoding and accept LF/CRLF text files.
-9. Resolve relative links per [Section 9.3](#93-path-resolution): links that stay inside the archive are internal; links that leave it ([Section 9.4](#94-links-outside-the-archive-optional)) or enter another archive ([Section 9.5](#95-links-into-archives-optional)) are followed only if supported and a host location is known, and are otherwise unresolved. Never clamp `..` at the archive root.
+9. Resolve relative links per [Section 9.3](#93-path-resolution): links that stay inside the archive are internal; links that leave it ([Section 9.4](#94-links-outside-the-archive-optional)) or enter another archive ([Section 9.5](#95-links-into-archives-optional)) are followed only if supported, a host location is known and the target is inside the trust boundary ([Section 9.6](#96-security-and-portability-of-links-beyond-an-archive)), and are otherwise unresolved. Resources loaded automatically from outside the archive stay unresolved unless enabled for the trust boundary. Never clamp `..` at the archive root.
 10. If no unambiguous entry point exists, show explicit error or user choice (do not auto-pick arbitrarily).
 
 ### 16.3 Terminology Alignment (Producer vs. Create)

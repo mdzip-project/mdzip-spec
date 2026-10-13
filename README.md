@@ -41,7 +41,7 @@ The specification covers:
 
 A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) containing:
 
-1. **`index.md`** at the archive root (for a single `.md` file, it can have any valid name. `index.md` will take precedence if there are multiple files and no manifest):
+1. **`index.md`** at the archive root. Without a manifest, consumers open `index.md`; failing that, the only Markdown file at the root, setting aside support files such as `README.md` and `AGENTS.md` (see SPEC.md §5.5):
 
    ```markdown
    # My Document
@@ -49,7 +49,7 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    Hello from MDZip!
    ```
 
-2. *(Optional)* **`manifest.json`** for metadata and entry-point override:
+2. **`manifest.json`** for metadata and the entry point. It's optional when you zip a folder by hand, and required in archives written by MDZip software (conforming producers). This example uses the current release, 1.1.0; under the 1.2.0 draft producers write `"version": "1.2.0"`:
 
    ```json
    {

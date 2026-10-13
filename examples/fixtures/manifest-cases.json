@@ -227,6 +227,64 @@
           "/spec/version": "1.2.0"
         }
       }
+    },
+    {
+      "name": "prerelease with a leading zero is not SemVer",
+      "manifestJson": "{\"spec\": {\"version\": \"1.2.0-01\"}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "major with a leading zero is not SemVer",
+      "manifestJson": "{\"spec\": {\"version\": \"01.2.0\"}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "two-part version is not SemVer",
+      "manifestJson": "{\"spec\": {\"version\": \"1.2\"}}",
+      "expected": {
+        "valid": false,
+        "errorCode": "ERR_MANIFEST_INVALID"
+      }
+    },
+    {
+      "name": "prerelease and build metadata are SemVer",
+      "manifestJson": "{\"spec\": {\"version\": \"1.2.0-rc.1+build.07\"}}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "RFC 3339 timestamp with offset is accepted",
+      "manifestJson": "{\"modified\": {\"when\": \"2026-03-08T09:30:00-05:00\"}}",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "ISO 8601 week date is not RFC 3339 and is ignored",
+      "manifestJson": "{\"created\": \"2026-W10-7\"}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "created"
+        ]
+      }
+    },
+    {
+      "name": "date without a time is not RFC 3339 and is ignored",
+      "manifestJson": "{\"modified\": {\"when\": \"2026-03-08\"}}",
+      "expected": {
+        "valid": true,
+        "ignoredFields": [
+          "modified"
+        ]
+      }
     }
   ]
 }

@@ -1,17 +1,20 @@
 {
-  "description": "Link resolution cases for SPEC Sections 9.3–9.5 (1.2.0-draft). Each case resolves `link` from `from` (a document inside an archive, or a host file) against the shared `host` model. `context` overrides the defaults { hostLocation: true, outsideLinks: true, intoArchiveLinks: true }. Expected kinds: internal (entry in the source archive), host (host file path), archive (entry inside another or the same archive, addressed through the host), url (not a path), unresolved (with a reason: not-found, invalid, unsupported, no-host-location, nested-archive). Reasons are informative; conformance requires only the kind and target.",
+  "description": "Link resolution cases for SPEC Sections 9.3–9.5 (1.2.0-draft). Each case resolves `link` from `from` (a document inside an archive, or a host file) against the shared `host` model. `context` overrides the defaults { hostLocation: true, outsideLinks: true, intoArchiveLinks: true, trustRoot: host.trustRoot, allowedPaths: [], loadOutsideResources: false }. `trustRoot` is the trust boundary (Section 9.6): host targets outside it are unresolved with reason `denied` unless listed in `allowedPaths`; `null` means no trusted location. `use` is `navigate` (default) or `embed` for a resource the document loads automatically; embeds that leave an archive are `denied` unless `loadOutsideResources` is true and the target is inside the trust boundary. Expected kinds: internal (entry in the source archive), host (host file path), archive (entry inside another or the same archive, addressed through the host), url (not a path), unresolved (with a reason: not-found, invalid, unsupported, no-host-location, nested-archive, denied). Reasons are informative; conformance requires only the kind and target.",
   "host": {
-    "description": "Host filesystem used by every case. \"files\" are ordinary files; \"archives\" are .mdz files with their entries; \"directories\" are real directories (Folder.mdz is a directory, not an archive).",
+    "description": "Host filesystem used by every case. \"files\" are ordinary files; \"archives\" are .mdz files with their entries; \"directories\" are real directories (Folder.mdz is a directory, not an archive). `trustRoot` is the default trust boundary for every case: MyVault is trusted, Secrets is not.",
     "files": [
       "MyVault/Notes.md",
       "MyVault/My Notes.md",
       "MyVault/References/Design.md",
-      "MyVault/Folder.mdz/readme.md"
+      "MyVault/Folder.mdz/readme.md",
+      "MyVault/photo.png",
+      "Secrets/key.txt"
     ],
     "directories": [
       "MyVault",
       "MyVault/References",
-      "MyVault/Folder.mdz"
+      "MyVault/Folder.mdz",
+      "Secrets"
     ],
     "archives": {
       "MyVault/Project.mdz": {
@@ -37,7 +40,8 @@
         ],
         "entryPoint": "index.md"
       }
-    }
+    },
+    "trustRoot": "MyVault"
   },
   "cases": [
     {
@@ -564,6 +568,144 @@
       "expected": {
         "kind": "unresolved",
         "reason": "not-found"
+      }
+    },
+    {
+      "name": "a target outside the trust boundary is denied",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../../Secrets/key.txt",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "a missing target outside the trust boundary is denied too, so links can't probe for files",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../../Secrets/nothing.txt",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "the user can allow a specific target outside the boundary",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../../Secrets/key.txt",
+      "context": {
+        "allowedPaths": [
+          "Secrets/key.txt"
+        ]
+      },
+      "expected": {
+        "kind": "host",
+        "path": "Secrets/key.txt"
+      }
+    },
+    {
+      "name": "with no trusted location, every link outside the archive is denied",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Notes.md",
+      "context": {
+        "trustRoot": null
+      },
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "a host note's link outside the trust boundary is denied",
+      "from": {
+        "host": "MyVault/Notes.md"
+      },
+      "link": "../Secrets/key.txt",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "an embedded resource outside the archive is not loaded by default",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../photo.png",
+      "use": "embed",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "an embedded resource inside the trust boundary loads when enabled",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../photo.png",
+      "context": {
+        "loadOutsideResources": true
+      },
+      "use": "embed",
+      "expected": {
+        "kind": "host",
+        "path": "MyVault/photo.png"
+      }
+    },
+    {
+      "name": "an embedded resource outside the trust boundary never loads",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../../Secrets/key.txt",
+      "context": {
+        "loadOutsideResources": true
+      },
+      "use": "embed",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
+      }
+    },
+    {
+      "name": "an embedded resource inside the archive is unaffected",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "images/logo.png",
+      "use": "embed",
+      "expected": {
+        "kind": "internal",
+        "entry": "images/logo.png"
+      }
+    },
+    {
+      "name": "a link into another archive is subject to the same rules when embedded",
+      "from": {
+        "archive": "MyVault/Project.mdz",
+        "path": "index.md"
+      },
+      "link": "../Other.mdz/guide.md",
+      "use": "embed",
+      "expected": {
+        "kind": "unresolved",
+        "reason": "denied"
       }
     }
   ]

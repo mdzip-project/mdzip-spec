@@ -10,6 +10,7 @@ Files:
 - `invalid-bad-entrypoint.mdz`
 - `line-endings-crlf.mdz`
 - `round-trip.mdz` — built from `../round-trip/`; producer preservation checks are in `round-trip-expectations.json` (tests `P-004`, `P-005`).
+- `hostile-content.mdz` — built from `../hostile-content/`: scripts, event handlers, SVG scripts, a `<base>` element and automatic `http:` loads that a renderer must neutralize. The cases, and how to check them with a local canary server, are in `hostile-content-cases.json` (test `T-016`).
 
 Machine-readable behavior fixtures:
 
@@ -17,7 +18,7 @@ Machine-readable behavior fixtures:
 - `path-validation-cases.json` — whether a single entry name satisfies Section 5.4 (leading `/`, `..`, `.` and empty segments, reserved and control characters).
 - `entry-set-cases.json` — whole-archive name checks: NFC duplicates (`ERR_DUPLICATE_PATH`) and a file that is also a directory (`ERR_PATH_CONFLICT`) (Section 5.4, test `T-013`).
 - `manifest-cases.json` — manifest validation: unreadable manifests, critical fields with wrong types or values, ignored descriptive fields, and duplicate member names (Section 6.4, test `T-012`). Each case gives the raw `manifest.json` text in `manifestJson`.
-- `link-resolution-cases.json` — link resolution from documents inside an archive and from host files, against a shared model of a vault containing notes, two archives and a directory named `Folder.mdz` (Sections 9.3–9.5, test `T-011`), including query and fragment splitting, invalid and double percent-encoding, encoded `#`, empty segments and trailing slashes.
+- `link-resolution-cases.json` — link resolution from documents inside an archive and from host files, against a shared model of a vault containing notes, two archives and a directory named `Folder.mdz` (Sections 9.3–9.5, test `T-011`), including query and fragment splitting, invalid and double percent-encoding, encoded `#`, empty segments, trailing slashes, the trust boundary (`denied`) and embedded resources (`use: "embed"`).
 - `path-matching-cases.json` — whether a lookup path matches an archive entry under Section 5.4.1 (NFC-normalized, case-sensitive). Non-ASCII characters are written as JSON `\u` escapes so normalization differences stay visible.
 - `create-filter-cases.json`
 
@@ -35,7 +36,9 @@ model.
 
 These JSON fixtures are intended to be consumed by multiple implementations
 (for example, C# and TypeScript) so both can assert the same behavior from a
-shared source of truth.
+shared set of cases. They are non-normative ([Section 14.3](../../SPEC.md#143-conformance-fixtures)):
+when a fixture and `SPEC.md` disagree, `SPEC.md` governs and the fixture is a
+defect to report.
 
 ## Using these fixtures in an implementation
 

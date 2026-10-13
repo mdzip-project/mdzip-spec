@@ -1,0 +1,9 @@
+{
+  "spec": {
+    "name": "mdzip-spec",
+    "version": "1.2.0"
+  },
+  "title": "Hostile content",
+  "entryPoint": "index.md",
+  "mode": "document"
+}

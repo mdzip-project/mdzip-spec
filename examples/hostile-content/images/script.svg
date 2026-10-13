@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" onload="new Image().src = 'http://127.0.0.1:18766/svg-file-script'">
+  <script>new Image().src = 'http://127.0.0.1:18766/svg-file-script';</script>
+  <rect width="16" height="16" fill="#888"/>
+</svg>
