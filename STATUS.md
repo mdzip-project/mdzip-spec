@@ -1,5 +1,5 @@
-Status: awaiting-test
-Last:   Added T-016 hostile-content fixture (scripts, handlers, <base>, http loads via a canary server); §4/§13.1 symlinks, §9.2, §9.3, §14.3 — not committed
+Status: idle
+Last:   Released v1.2.0 (2026-10-13)
 
 Owner to-do (review/commit/release steps): ../planning/owner-todo.md
 

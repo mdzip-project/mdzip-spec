@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [1.2.0-draft] - Unreleased
+## [1.2.0] - 2026-10-13
 
 ### Added
 
@@ -29,6 +29,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Fixtures for the release: `symlink-entries.mdz` (new test `T-017`: symbolic links to a file, to a directory and out of the archive, none of which a consumer may follow), `unsupported-compression.mdz` (a BZIP2 entry for `T-014`, which had no fixture) and `project-mode.mdz` (from `examples/project-mode/`, for `T-015`, which had none either). Expected outcomes in `archive-cases.json`. New producer check `P-008` (saving an archive that contains symbolic links), and `P-007` now includes "no symbolic links". The archives are generated reproducibly by `tools/build-zip-fixtures.py`.
 - Conformance test `T-016` (hostile content) with `examples/hostile-content/`, `fixtures/hostile-content.mdz` and `fixtures/hostile-content-cases.json`: twelve cases (scripts, event handlers, inline and file SVG scripts, `javascript:` links, `<base>`, meta refresh, and automatic `http:` loads by stylesheets, `style`, iframes, objects and images). Each one requests a local canary URL if it gets through, so a harness only needs a small HTTP server. Rendering consumers only.
 - Sections 4 and 13.1: symbolic links. Every entry MUST be a regular file or a directory, and producers MUST NOT write symbolic links or other special files. Consumers MUST NOT follow a symlink entry (no link created on extraction, no path or Markdown link resolved through it, even to a target inside the archive); they SHOULD report it and MAY skip it or read it as a file containing the target text. Was "SHOULD ignore or safely handle". Unicode file names were already covered by Section 5.4.1. ([#4](https://github.com/mdzip-project/mdzip-spec/issues/4))
 - Section 9.2: automatically loaded external resources (such as `![logo](https://example.com/logo.png)`) reveal to their server that the document was opened and make the archive not self-contained. Consumers SHOULD let users turn this loading off and SHOULD NOT load over unencrypted `http:`; producers and validators MAY report external resources as informational notices. Closes the gap with Section 9.6, which already limited automatic loading of local files outside the archive. Also a Section 13.2 bullet.

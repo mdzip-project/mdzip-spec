@@ -1,5 +1,5 @@
 {
-  "description": "Round-trip preservation checks for SPEC Sections 6.3 and 14.1 (1.2.0-draft). Open round-trip.mdz, run each flow, save, and repeat the flow at least twice. After every save: (1) every pointer in preservedManifestValues still holds a value that is JSON-equal to the one listed; (2) every entry listed in preservedEntries that is not in the flow's changes or removes is still present with the same path, byte length and SHA-256. Entries in changes may differ; entries in removes must be absent.",
+  "description": "Round-trip preservation checks for SPEC Sections 6.3 and 14.1 (1.2.0). Open round-trip.mdz, run each flow, save, and repeat the flow at least twice. After every save: (1) every pointer in preservedManifestValues still holds a value that is JSON-equal to the one listed; (2) every entry listed in preservedEntries that is not in the flow's changes or removes is still present with the same path, byte length and SHA-256. Entries in changes may differ; entries in removes must be absent.",
   "source": "examples/round-trip/",
   "archive": "examples/fixtures/round-trip.mdz",
   "preservedManifestValues": [

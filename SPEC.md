@@ -1,8 +1,8 @@
 # MDZip (.mdz) File Format Specification
 
-**Version:** 1.2.0-draft  
-**Status:** Draft  
-**Date:** 2026-10-11
+**Version:** 1.2.0  
+**Status:** Final  
+**Date:** 2026-10-13
 
 ---
 

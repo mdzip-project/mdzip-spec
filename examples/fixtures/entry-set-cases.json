@@ -1,5 +1,5 @@
 {
-  "description": "Whole-archive entry name checks (SPEC Section 5.4, 1.2.0-draft). `entries` lists stored names in order; a name ending in `/` is a directory entry. An archive is valid when no two entries are equal after NFC normalization (ERR_DUPLICATE_PATH) and no file's path is also a directory of another entry (ERR_PATH_CONFLICT). Non-ASCII names are written as JSON \\u escapes so normalization differences stay visible. Names that differ only in case are valid (SHOULD NOT, not MUST NOT); consumers may warn.",
+  "description": "Whole-archive entry name checks (SPEC Section 5.4, 1.2.0). `entries` lists stored names in order; a name ending in `/` is a directory entry. An archive is valid when no two entries are equal after NFC normalization (ERR_DUPLICATE_PATH) and no file's path is also a directory of another entry (ERR_PATH_CONFLICT). Non-ASCII names are written as JSON \\u escapes so normalization differences stay visible. Names that differ only in case are valid (SHOULD NOT, not MUST NOT); consumers may warn.",
   "cases": [
     {
       "name": "distinct files are valid",

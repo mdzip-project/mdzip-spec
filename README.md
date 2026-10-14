@@ -2,7 +2,7 @@
 
 Specification for the **MDZip** (`.mdz`) file format.
 
-Current release: `v1.1.0` (dated `2026-04-05`). Draft in progress: `v1.2.0-draft` — see [CHANGELOG.md](CHANGELOG.md).
+Current release: `v1.2.0` (dated `2026-10-13`) — see [CHANGELOG.md](CHANGELOG.md).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 
@@ -49,15 +49,16 @@ A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) contain
    Hello from MDZip!
    ```
 
-2. **`manifest.json`** for metadata and the entry point. It's optional when you zip a folder by hand, and required in archives written by MDZip software (conforming producers). This example uses the current release, 1.1.0; under the 1.2.0 draft producers write `"version": "1.2.0"`:
+2. **`manifest.json`** for metadata and the entry point. It's optional when you zip a folder by hand, and required in archives written by MDZip software (conforming producers). This example uses the current release, 1.2.0:
 
    ```json
    {
      "spec": {
        "name": "mdzip-spec",
-       "version": "1.1.0"
+       "version": "1.2.0"
      },
      "title": "My Document",
+     "mode": "document",
      "entryPoint": "index.md"
    }
    ```
