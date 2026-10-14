@@ -1,5 +1,5 @@
-Status: idle
-Last:   Released v1.2.0 (2026-10-13)
+Status: awaiting-test
+Last:   Branch ci/notify-site: workflow redeploys mdzip.org when SPEC.md changes on main (needs SITE_DEPLOY_TOKEN secret) — not committed
 
 Owner to-do (review/commit/release steps): ../planning/owner-todo.md
 

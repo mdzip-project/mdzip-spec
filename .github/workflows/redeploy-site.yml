@@ -1,0 +1,37 @@
+# Rebuild mdzip.org when SPEC.md changes on main.
+#
+# mdzip.org/spec.html is prerendered at build time from
+# raw.githubusercontent.com/.../main/SPEC.md, so the live page only changes
+# when the site is rebuilt. This starts mdzip.org's deploy workflow (it has a
+# workflow_dispatch trigger) on its current main.
+#
+# Needs the SITE_DEPLOY_TOKEN secret: a fine-grained personal access token
+# with access to mdzip-project/mdzip.org only and the "Actions: Read and
+# write" repository permission. Without it, the job warns and does nothing.
+
+name: Redeploy mdzip.org
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - SPEC.md
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start the mdzip.org deploy workflow
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::SITE_DEPLOY_TOKEN is not set; mdzip.org was not redeployed, so spec.html still shows the previous SPEC.md."
+            exit 0
+          fi
+          gh workflow run deploy.yml --repo mdzip-project/mdzip.org --ref main
+          echo "Started mdzip.org deploy on main: https://github.com/mdzip-project/mdzip.org/actions/workflows/deploy.yml" >> "$GITHUB_STEP_SUMMARY"
