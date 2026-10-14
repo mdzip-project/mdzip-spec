@@ -13,6 +13,7 @@ The manifests in `with-manifest/` and `invalid/` keep `spec.version` `1.1.0` on 
 - `line-endings-crlf/` - valid compatibility case for consumer CRLF handling.
 - `round-trip/` - producer preservation case: a manifest with unknown fields of every JSON type (top level, nested in known objects, profile-like), `AGENTS.md` at the root, nested and over 24 KB, plus an unknown binary file and a CSV. Prebuilt as `fixtures/round-trip.mdz`; checks in `fixtures/round-trip-expectations.json` (tests `P-004`, `P-005`). Its files are stored with `-text` in `.gitattributes` so checksums don't change on checkout.
 - `hostile-content/` - consumer rendering case (`T-016`): a document full of scripts, event handlers, SVG scripts, a `<base>` element and automatic `http:` loads, each of which requests a local *canary* URL if it gets through. Prebuilt as `fixtures/hostile-content.mdz`; cases in `fixtures/hostile-content-cases.json`.
+- `project-mode/` - a `project` archive with three independent documents (`T-015`). Prebuilt as `fixtures/project-mode.mdz` by `tools/build-zip-fixtures.py`, which also builds `fixtures/symlink-entries.mdz` (`T-017`) and `fixtures/unsupported-compression.mdz` (`T-014`); those two have no source folder because a folder can't hold symbolic link entries or choose a compression method.
 
 ## Usage
 
