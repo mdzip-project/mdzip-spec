@@ -1,0 +1,44 @@
+# Rebuild mdzip.org when an announcement changes.
+#
+# mdzip.org's news (/news/ and /feed.xml) comes from this repo's Discussions
+# → Announcements category: its deploy workflow syncs the announcements into
+# .mdz files and publishes them. This starts that deploy when an announcement,
+# or a comment on one, is posted, edited or deleted. mdzip.org also syncs
+# daily, so a missed run only delays a post.
+#
+# Needs a fine-grained personal access token with access to
+# mdzip-project/mdzip.org only and the "Actions: Read and write" repository
+# permission, in the MDZIP_ORG_DISPATCH_TOKEN secret (or SITE_DEPLOY_TOKEN,
+# the same kind of token, used by redeploy-site.yml). Without one, the job
+# warns and does nothing.
+
+name: Announce news on mdzip.org
+
+on:
+  discussion:
+    types: [created, edited, deleted, labeled, unlabeled, category_changed]
+  discussion_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  redeploy:
+    # Announcements only, including a discussion moved into or out of it.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.discussion.category.slug == 'announcements' ||
+      github.event.changes.category.from.slug == 'announcements'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start the mdzip.org deploy workflow
+        env:
+          GH_TOKEN: ${{ secrets.MDZIP_ORG_DISPATCH_TOKEN || secrets.SITE_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::No MDZIP_ORG_DISPATCH_TOKEN or SITE_DEPLOY_TOKEN secret; mdzip.org was not redeployed. Its daily run will pick up the announcement."
+            exit 0
+          fi
+          gh workflow run deploy.yml --repo mdzip-project/mdzip.org --ref main
+          echo "Started mdzip.org deploy on main: https://github.com/mdzip-project/mdzip.org/actions/workflows/deploy.yml" >> "$GITHUB_STEP_SUMMARY"
