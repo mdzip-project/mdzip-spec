@@ -1015,7 +1015,7 @@ This section is non-normative and is intended to help tool authors and AI-assist
 
 ### 16.1 Producer Build Checklist
 
-When creating a `.mdz` archive, a producer can follow this sequence:
+When creating an `.mdz` archive, a producer can follow this sequence:
 
 1. Collect source Markdown and assets in a staging tree.
 2. Normalize text encoding to UTF-8 for Markdown and JSON files.
@@ -1031,7 +1031,7 @@ When creating a `.mdz` archive, a producer can follow this sequence:
 
 ### 16.2 Consumer Load Checklist
 
-When opening a `.mdz` archive, a consumer can follow this sequence:
+When opening an `.mdz` archive, a consumer can follow this sequence:
 
 1. Open archive as ZIP using the central directory; reject encrypted entries and, optionally, compression methods other than 0 and 8.
 2. Enumerate entries and validate them against [Section 5.4](#54-path-constraints): no leading `/`, no empty, `.` or `..` segments, no reserved or control characters, no NFC duplicates, and no file that is also a directory. Reject rather than rename ([Section 13.1](#131-archive-handling)).

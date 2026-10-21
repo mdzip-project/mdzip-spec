@@ -39,7 +39,7 @@ The specification covers:
 
 ## Quick Start
 
-A minimal `.mdz` file is a ZIP archive (renamed with a `.mdz` extension) containing:
+A minimal `.mdz` file is a ZIP archive (renamed with an `.mdz` extension) containing:
 
 1. **`index.md`** at the archive root. Without a manifest, consumers open `index.md`; failing that, the only Markdown file at the root, setting aside support files such as `README.md` and `AGENTS.md` (see SPEC.md §5.5):
 
