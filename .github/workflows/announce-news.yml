@@ -8,9 +8,8 @@
 #
 # Needs a fine-grained personal access token with access to
 # mdzip-project/mdzip.org only and the "Actions: Read and write" repository
-# permission, in the MDZIP_ORG_DISPATCH_TOKEN secret (or SITE_DEPLOY_TOKEN,
-# the same kind of token, used by redeploy-site.yml). Without one, the job
-# warns and does nothing.
+# permission, in the MDZIP_ORG_DISPATCH_TOKEN secret (shared with
+# redeploy-site.yml). Without it, the job warns and does nothing.
 
 name: Announce news on mdzip.org
 
@@ -34,10 +33,10 @@ jobs:
     steps:
       - name: Start the mdzip.org deploy workflow
         env:
-          GH_TOKEN: ${{ secrets.MDZIP_ORG_DISPATCH_TOKEN || secrets.SITE_DEPLOY_TOKEN }}
+          GH_TOKEN: ${{ secrets.MDZIP_ORG_DISPATCH_TOKEN }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::No MDZIP_ORG_DISPATCH_TOKEN or SITE_DEPLOY_TOKEN secret; mdzip.org was not redeployed. Its daily run will pick up the announcement."
+            echo "::warning::MDZIP_ORG_DISPATCH_TOKEN is not set; mdzip.org was not redeployed. Its daily run will pick up the announcement."
             exit 0
           fi
           gh workflow run deploy.yml --repo mdzip-project/mdzip.org --ref main

@@ -5,7 +5,8 @@
 # when the site is rebuilt. This starts mdzip.org's deploy workflow (it has a
 # workflow_dispatch trigger) on its current main.
 #
-# Needs the SITE_DEPLOY_TOKEN secret: a fine-grained personal access token
+# Needs the MDZIP_ORG_DISPATCH_TOKEN secret (shared with announce-news.yml):
+# a fine-grained personal access token
 # with access to mdzip-project/mdzip.org only and the "Actions: Read and
 # write" repository permission. Without it, the job warns and does nothing.
 
@@ -27,10 +28,10 @@ jobs:
     steps:
       - name: Start the mdzip.org deploy workflow
         env:
-          GH_TOKEN: ${{ secrets.SITE_DEPLOY_TOKEN }}
+          GH_TOKEN: ${{ secrets.MDZIP_ORG_DISPATCH_TOKEN }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::SITE_DEPLOY_TOKEN is not set; mdzip.org was not redeployed, so spec.html still shows the previous SPEC.md."
+            echo "::warning::MDZIP_ORG_DISPATCH_TOKEN is not set; mdzip.org was not redeployed, so spec.html still shows the previous SPEC.md."
             exit 0
           fi
           gh workflow run deploy.yml --repo mdzip-project/mdzip.org --ref main
