@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Copy the spec's shared fixtures (examples/fixtures/) from a released spec
-// tag into an implementation's test folder, and record what was copied.
+// Copy the spec's shared fixtures (fixtures/) from a released spec tag into
+// an implementation's test folder, and record what was copied. Tags up to
+// v1.2.0 kept them in examples/fixtures/; the tool reads either layout.
 //
 //   node tools/sync-fixtures.mjs <target-dir> [--ref v1.2.0]
 //   node tools/sync-fixtures.mjs <target-dir> --working-tree
@@ -30,7 +31,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const MARKER = 'SPEC-FIXTURES.json';
-const FIXTURES = 'examples/fixtures';
+// Newest layout first. Only files directly in the folder are fixtures; its
+// src/ subfolder (the archives' source folders) is never copied.
+const FIXTURE_DIRS = ['fixtures', 'examples/fixtures'];
 const specRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const args = process.argv.slice(2);
@@ -79,20 +82,28 @@ let read;
 if (workingTree) {
   useRef = 'working-tree';
   commit = 'working-tree';
-  names = readdirSync(join(specRoot, FIXTURES), { withFileTypes: true })
+  const dir = FIXTURE_DIRS[0];
+  names = readdirSync(join(specRoot, dir), { withFileTypes: true })
     .filter((d) => d.isFile())
     .map((d) => d.name);
-  read = (name) => readFileSync(join(specRoot, FIXTURES, name));
+  read = (name) => readFileSync(join(specRoot, dir, name));
 } else {
   useRef = ref ?? 'HEAD';
   if (!ref) console.warn('No --ref given; using HEAD. Pin implementations to a released tag (e.g. --ref v1.2.0).');
   commit = git('rev-parse', `${useRef}^{commit}`).toString().trim();
-  names = git('ls-tree', '-r', '--name-only', commit, `${FIXTURES}/`)
-    .toString()
-    .split('\n')
-    .filter(Boolean)
-    .map((p) => p.slice(FIXTURES.length + 1));
-  read = (name) => git('show', `${commit}:${FIXTURES}/${name}`);
+  const listAt = (dir) =>
+    git('ls-tree', '-r', '--name-only', commit, `${dir}/`)
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .map((p) => p.slice(dir.length + 1));
+  const dir = FIXTURE_DIRS.find((d) => listAt(d).length > 0);
+  if (!dir) {
+    console.error(`No fixtures at ${useRef}: none of ${FIXTURE_DIRS.join(', ')} exists there.`);
+    process.exit(1);
+  }
+  names = listAt(dir);
+  read = (name) => git('show', `${commit}:${dir}/${name}`);
 }
 names = names.filter((n) => n !== 'README.md' && !n.includes('/')).sort();
 

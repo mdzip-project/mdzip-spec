@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Repository layout (no change to the format): the shared fixtures moved from `examples/fixtures/` to a top-level `fixtures/`, with the folders the archives are built from in `fixtures/src/`. The test catalog from `tests/README.md` is now in `fixtures/README.md`. `examples/` now holds non-normative templates and guidance, including the design rationale that was in `reference/README.md` (now `examples/rationale.md`). In `hostile-content-cases.json`, `round-trip-expectations.json` and `archive-cases.json`, the informational `source`/`archive` paths follow the new layout. `tools/sync-fixtures.mjs` reads either layout, so syncing from `v1.2.0` and earlier tags still works.
+
 ## [1.2.0] - 2026-10-13
 
 ### Added

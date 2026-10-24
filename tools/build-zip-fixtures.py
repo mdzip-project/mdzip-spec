@@ -4,14 +4,14 @@ the project-mode archive built alongside them.
 
     python tools/build-zip-fixtures.py
 
-Writes to examples/fixtures/:
+Writes to fixtures/:
 
 - symlink-entries.mdz        (test T-017; Sections 4, 13.1)
 - unsupported-compression.mdz (test T-014; Section 4)
-- project-mode.mdz           (test T-015; Section 5.7.6), from examples/project-mode/
+- project-mode.mdz           (test T-015; Section 5.7.6), from fixtures/src/project-mode/
 
 Output is byte-for-byte reproducible: fixed timestamps, fixed entry order and
-attributes. Rerun it after changing anything below or in examples/project-mode/,
+attributes. Rerun it after changing anything below or in fixtures/src/project-mode/,
 and commit the archives together with this script.
 
 Python's zipfile is used because it writes Unix file types in the external
@@ -22,7 +22,7 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "examples" / "fixtures"
+FIXTURES = ROOT / "fixtures"
 DATE = (2026, 10, 13, 0, 0, 0)
 
 S_IFREG = 0o100000
@@ -103,7 +103,7 @@ def build_compression():
 
 
 def build_project():
-    src = ROOT / "examples" / "project-mode"
+    src = FIXTURES / "src" / "project-mode"
     files = sorted(p for p in src.rglob("*") if p.is_file())
     # manifest.json first, then the rest in path order.
     files.sort(key=lambda p: (p.name != "manifest.json", p.relative_to(src).as_posix()))

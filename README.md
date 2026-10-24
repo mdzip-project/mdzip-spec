@@ -30,10 +30,9 @@ The specification covers:
 ## Repository Contents
 
 - [SPEC.md](SPEC.md) - canonical format specification
-- [examples/](examples/README.md) - sample valid and invalid package structures
-- [tests/](tests/README.md) - conformance case catalog and expected behavior
+- [fixtures/](fixtures/README.md) - shared conformance fixtures: test catalog, prebuilt archives and machine-readable cases
+- [examples/](examples/README.md) - non-normative templates, guidance and design rationale
 - [schema/](schema/manifest-1.2.0.schema.json) - versioned JSON Schema companion for manifest validation
-- [reference/](reference/README.md) - non-normative notes and rationale
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process
 

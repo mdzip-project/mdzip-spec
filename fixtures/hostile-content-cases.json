@@ -1,7 +1,7 @@
 {
   "description": "Consumer rendering checks for test T-016 (Sections 9.2, 9.3, 13.2; 1.2.0). Serve HTTP on the canary origin, open hostile-content.mdz, render its entry point as the consumer normally would, wait until rendering settles (a few seconds), then check: (1) the canary received no request for any case with check \"canary\"; (2) the rendered document contains nothing listed under a case with check \"dom\"; (3) the archive's own image (images/ok.png) rendered, so a consumer can't pass by rendering nothing. A canary request path is /<id>, or starts with /<id>/. Each case names the requirement it rests on: MUST cases are conformance failures, SHOULD cases are recommendations. Nonconformant behaviour that never reaches the canary (for example an alert dialog) still fails the case.",
-  "source": "examples/hostile-content/",
-  "archive": "examples/fixtures/hostile-content.mdz",
+  "source": "fixtures/src/hostile-content/",
+  "archive": "fixtures/hostile-content.mdz",
   "document": "index.md",
   "canary": "http://127.0.0.1:18766",
   "renders": ["images/ok.png"],

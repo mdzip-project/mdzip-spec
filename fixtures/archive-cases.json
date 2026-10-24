@@ -68,7 +68,7 @@
       "archive": "project-mode.mdz",
       "section": "5.7.6",
       "requirement": "MUST",
-      "source": "examples/project-mode/",
+      "source": "fixtures/src/project-mode/",
       "expectedEntryPoint": "index.md",
       "documents": [
         "index.md",

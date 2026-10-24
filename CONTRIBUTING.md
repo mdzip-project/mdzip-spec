@@ -5,15 +5,14 @@ Thanks for helping improve the MDZip (`.mdz`) specification.
 ## Scope
 
 - Normative requirements belong in [SPEC.md](SPEC.md).
-- Non-normative rationale belongs in [`reference/`](reference/README.md).
-- Example package structures belong in [`examples/`](examples/README.md).
-- Conformance expectations belong in [`tests/`](tests/README.md).
+- Conformance tests and fixtures belong in [`fixtures/`](fixtures/README.md) (fixture source folders in `fixtures/src/`).
+- Non-normative templates, guidance and rationale belong in [`examples/`](examples/README.md) (rationale in [`examples/rationale.md`](examples/rationale.md)).
 
 ## Change Process
 
 1. Open an issue describing the change and rationale.
 2. Submit a pull request with focused edits.
-3. Update related examples/tests when normative behavior changes.
+3. Update related fixtures and examples when normative behavior changes.
 4. Add an entry in [CHANGELOG.md](CHANGELOG.md).
 
 ## Editorial Rules

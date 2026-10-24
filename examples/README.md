@@ -1,23 +1,31 @@
-# examples
+# Examples and guidance
 
-Sample `.mdz` package structures for implementers.
+Explanatory, **non-normative** material for people producing or reading `.mdz`
+files. The requirements are in [`SPEC.md`](../SPEC.md); the executable
+conformance cases are in [`fixtures/`](../fixtures/README.md). When anything
+here disagrees with `SPEC.md`, `SPEC.md` governs.
 
-## Included Starter Cases
+## Templates
 
-- `minimal/` - smallest valid archive-root contents (only `index.md`).
-- `with-manifest/` - valid package with optional `manifest.json` and nested assets.
-- `invalid/missing-index/` - invalid case: manifest declares `entryPoint: "index.md"` but the file is absent (`ERR_ENTRYPOINT_MISSING`).
-- `invalid/bad-entrypoint/` - invalid case: manifest `entryPoint` does not exist.
+- [`templates/README.sample.md`](templates/README.sample.md) - a reusable human-facing package `README.md` (Section 5.6).
+- [`templates/AGENTS.sample.md`](templates/AGENTS.sample.md) - a reusable agent-facing `AGENTS.md` for tools without native `.mdz` support (Section 5.8).
 
-The manifests in `with-manifest/` and `invalid/` keep `spec.version` `1.1.0` on purpose: they also show that a consumer for a newer minor version accepts older-minor archives (Section 11.2), and the prebuilt `.mdz` fixtures built from them stay byte-stable across releases.
-- `line-endings-crlf/` - valid compatibility case for consumer CRLF handling.
-- `round-trip/` - producer preservation case: a manifest with unknown fields of every JSON type (top level, nested in known objects, profile-like), `AGENTS.md` at the root, nested and over 24 KB, plus an unknown binary file and a CSV. Prebuilt as `fixtures/round-trip.mdz`; checks in `fixtures/round-trip-expectations.json` (tests `P-004`, `P-005`). Its files are stored with `-text` in `.gitattributes` so checksums don't change on checkout.
-- `hostile-content/` - consumer rendering case (`T-016`): a document full of scripts, event handlers, SVG scripts, a `<base>` element and automatic `http:` loads, each of which requests a local *canary* URL if it gets through. Prebuilt as `fixtures/hostile-content.mdz`; cases in `fixtures/hostile-content-cases.json`.
-- `project-mode/` - a `project` archive with three independent documents (`T-015`). Prebuilt as `fixtures/project-mode.mdz` by `tools/build-zip-fixtures.py`, which also builds `fixtures/symlink-entries.mdz` (`T-017`) and `fixtures/unsupported-compression.mdz` (`T-014`); those two have no source folder because a folder can't hold symbolic link entries or choose a compression method.
+## Sample packages
 
-## Usage
+Each fixture archive is built from a plain folder you can browse, in
+[`fixtures/src/`](../fixtures/src/). Good starting points:
 
-- Treat each directory as archive-root content, zip it, then rename to `.mdz`.
-- Expected outcomes are documented in [tests/README.md](../tests/README.md).
-- Prebuilt fixture archives are available in [`examples/fixtures/`](fixtures/).
-- A reusable human-facing package `README.md` template is available at [`examples/templates/README.sample.md`](templates/README.sample.md), and an agent-facing `AGENTS.md` template at [`examples/templates/AGENTS.sample.md`](templates/AGENTS.sample.md).
+- [`minimal/`](../fixtures/src/minimal/) - the smallest valid archive: only `index.md`, no manifest.
+- [`with-manifest/`](../fixtures/src/with-manifest/) - a `manifest.json` with an `entryPoint`, and nested assets.
+- [`project-mode/`](../fixtures/src/project-mode/) - a `project` archive with three independent documents.
+- [`round-trip/`](../fixtures/src/round-trip/) - unknown manifest fields and an `AGENTS.md` a producer must preserve.
+
+To try one by hand, zip the folder's contents (not the folder itself) and
+rename the result to `.mdz`. The prebuilt archives are next to the cases in
+[`fixtures/`](../fixtures/README.md#files).
+
+## Design rationale
+
+[`rationale.md`](rationale.md) explains why the format is the way it is: why
+ZIP, why `index.md`, why a JSON manifest, why no mandated Markdown dialect,
+modes, and more.

@@ -922,7 +922,7 @@ A conforming consumer is any software that reads and/or processes `.mdz` files. 
 
 ### 14.3 Conformance Fixtures
 
-This repository publishes machine-readable conformance fixtures in [`examples/fixtures/`](examples/fixtures/README.md), and the tests that use them in [`tests/README.md`](tests/README.md). Implementations **SHOULD** run them, pinned to a released tag of this specification.
+This repository publishes machine-readable conformance fixtures in [`fixtures/`](fixtures/README.md), together with the tests that use them. Implementations **SHOULD** run them, pinned to a released tag of this specification.
 
 The fixtures are non-normative. They illustrate the requirements in this document and do not add to them. When a fixture and the prose disagree, the prose governs and the fixture is a defect to report. Passing every fixture does not by itself make an implementation conforming.
 
@@ -1090,7 +1090,7 @@ To improve deterministic implementation quality, AI prompts should explicitly in
 - whether producer, consumer, or both are being implemented;
 - required conformance scope (minimum MUSTs vs. SHOULDs included);
 - required behavior for ambiguous entry points;
-- explicit test expectations from [`tests/README.md`](tests/README.md).
+- explicit test expectations from [`fixtures/README.md`](fixtures/README.md).
 
 ---
 

@@ -1,4 +1,4 @@
-# Reference Notes
+# Design rationale
 
 Non-normative design rationale and background for the `.mdz` specification.
 
