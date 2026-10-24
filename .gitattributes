@@ -2,4 +2,5 @@
 fixtures/src/round-trip/** -text
 fixtures/src/hostile-content/** -text
 fixtures/src/project-mode/** -text
+examples/samples/** -text
 *.mdz binary

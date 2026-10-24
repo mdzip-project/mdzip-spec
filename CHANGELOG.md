@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `examples/implementers.md` (non-normative): a conformance guide for app developers adding `.mdz` support — the Section 14 requirements grouped by role (opening, creating, saving changes, rendering) as required / recommended / optional checklists, a test plan (samples, `mdz validate`, which fixture checks apply to which role, and a prompt for having an AI coding assistant write the fixture tests), common mistakes, how to tell MDZip apart from other formats that use `.mdz`, and the criteria for being listed on mdzip.org.
+- `examples/samples/`: five valid sample archives with their source folders — `hello`, `field-guide` (multi-file document, images, every manifest field), `team-notes` (project mode), `hand-zipped` (no manifest, `README.md` set aside), `keep-on-save` (unknown files and manifest fields to preserve). Built reproducibly by `tools/build-examples.py`. No change to the format.
+
 ### Changed
 
 - Repository layout (no change to the format): the shared fixtures moved from `examples/fixtures/` to a top-level `fixtures/`, with the folders the archives are built from in `fixtures/src/`. The test catalog from `tests/README.md` is now in `fixtures/README.md`. `examples/` now holds non-normative templates and guidance, including the design rationale that was in `reference/README.md` (now `examples/rationale.md`). In `hostile-content-cases.json`, `round-trip-expectations.json` and `archive-cases.json`, the informational `source`/`archive` paths follow the new layout. `tools/sync-fixtures.mjs` reads either layout, so syncing from `v1.2.0` and earlier tags still works.

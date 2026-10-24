@@ -1,0 +1,36 @@
+{
+  "spec": {
+    "name": "mdzip-spec",
+    "version": "1.2.0"
+  },
+  "producer": {
+    "application": {
+      "name": "mdzip-spec examples",
+      "version": "1.2.0",
+      "url": "https://github.com/mdzip-project/mdzip-spec/tree/main/examples/samples"
+    }
+  },
+  "author": {
+    "name": "MDZip Project",
+    "url": "https://mdzip.org"
+  },
+  "title": "Brewing Coffee at Home",
+  "mode": "document",
+  "entryPoint": "index.md",
+  "language": "en",
+  "description": "A short guide split into chapters, with images, used to check how an app opens a multi-file document.",
+  "version": "1.0.0",
+  "created": {
+    "when": "2026-10-24T09:00:00Z",
+    "by": {
+      "name": "MDZip Project"
+    }
+  },
+  "modified": "2026-10-24T10:30:00Z",
+  "license": "CC0-1.0",
+  "keywords": [
+    "coffee",
+    "example"
+  ],
+  "cover": "images/cover.png"
+}

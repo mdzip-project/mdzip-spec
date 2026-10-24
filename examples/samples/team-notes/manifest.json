@@ -1,0 +1,15 @@
+{
+  "spec": {
+    "version": "1.2.0"
+  },
+  "producer": {
+    "application": {
+      "name": "mdzip-spec examples",
+      "version": "1.2.0",
+      "url": "https://github.com/mdzip-project/mdzip-spec/tree/main/examples/samples"
+    }
+  },
+  "title": "Team Notes",
+  "mode": "project",
+  "entryPoint": "index.md"
+}

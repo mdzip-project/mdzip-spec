@@ -31,7 +31,8 @@ The specification covers:
 
 - [SPEC.md](SPEC.md) - canonical format specification
 - [fixtures/](fixtures/README.md) - shared conformance fixtures: test catalog, prebuilt archives and machine-readable cases
-- [examples/](examples/README.md) - non-normative templates, guidance and design rationale
+- [examples/](examples/README.md) - non-normative templates, sample archives, guidance and design rationale
+- [Conformance guide for apps](examples/implementers.md) - for app developers: what's required and optional, how to test, and how to get listed on mdzip.org
 - [schema/](schema/manifest-1.2.0.schema.json) - versioned JSON Schema companion for manifest validation
 - [CHANGELOG.md](CHANGELOG.md) - project change history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - contribution process
