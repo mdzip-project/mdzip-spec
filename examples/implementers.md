@@ -14,7 +14,7 @@ yourself, and for checking the result either way.
 This guide is non-normative. The requirements are in
 [`SPEC.md`](../SPEC.md), mainly [Section 14 (Conformance)](../SPEC.md#14-conformance);
 when this page and the specification disagree, the specification governs.
-It is written against specification **1.2.0**.
+It is written against specification **1.2.1** (same format as 1.2.0).
 
 - [1. Decide which roles your app plays](#1-decide-which-roles-your-app-plays)
 - [2. Required, recommended and optional](#2-required-recommended-and-optional)
@@ -171,23 +171,22 @@ a reimplementation instead of your app's code, or changing an expected result
 to make a test pass. Paste this prompt into your assistant from your
 project's folder:
 
-<!-- On the next spec release, update the version and URLs below: after
-     v1.2.0, the fixtures are in fixtures/ and the catalog in fixtures/README.md. -->
+<!-- On the next spec release, update the version and URLs below. -->
 
 ```text
 Add MDZip conformance tests to this project, using the official spec fixtures.
 
-Spec version: 1.2.0
+Spec version: 1.2.1
 Requirements (authoritative):
-  https://github.com/mdzip-project/mdzip-spec/blob/v1.2.0/SPEC.md
+  https://github.com/mdzip-project/mdzip-spec/blob/v1.2.1/SPEC.md
 Fixtures:
-  https://github.com/mdzip-project/mdzip-spec/tree/v1.2.0/examples/fixtures
+  https://github.com/mdzip-project/mdzip-spec/tree/v1.2.1/fixtures
 Catalog of the T- and P- checks and their expected results:
-  https://github.com/mdzip-project/mdzip-spec/blob/v1.2.0/tests/README.md
+  https://github.com/mdzip-project/mdzip-spec/blob/v1.2.1/fixtures/README.md
 
-1. Copy the fixtures into this project's test folder from the v1.2.0 tag.
+1. Copy the fixtures into this project's test folder from the v1.2.1 tag.
    If Node is available, clone the spec repo at that tag outside this
-   project and run its tools/sync-fixtures.mjs <test-fixtures-dir> --ref v1.2.0,
+   project and run its tools/sync-fixtures.mjs <test-fixtures-dir> --ref v1.2.1,
    which also writes a SPEC-FIXTURES.json marker. Tests must read the copied
    files, never the network.
 2. Work out which roles this project plays: opening .mdz files (consumer),

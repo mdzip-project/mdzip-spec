@@ -1,8 +1,8 @@
 # MDZip (.mdz) File Format Specification
 
-**Version:** 1.2.0  
+**Version:** 1.2.1  
 **Status:** Final  
-**Date:** 2026-10-13
+**Date:** 2026-10-25
 
 ---
 
@@ -1081,6 +1081,7 @@ Implementations may expose stable error categories to simplify debugging and cro
 - `ERR_PATH_CONFLICT`: a file's path is also the directory of another entry, such as `docs` and `docs/intro.md` ([Section 5.4](#54-path-constraints)).
 - `ERR_DUPLICATE_PATH`: duplicate logical archive paths were detected — two entries equal after NFC normalization, or duplicates left by an update operation.
 - `ERR_MODE_UNSUPPORTED`: the manifest declares a `mode` value that the consumer does not support or does not recognize.
+- `ERR_LIMIT_EXCEEDED`: the archive or an entry exceeds a resource limit the consumer enforces, such as entry count, uncompressed size or compression ratio, or an entry decompresses to more than its declared size ([Section 13.1](#131-archive-handling)).
 
 ### 16.6 AI Agent Prompting Tips
 

@@ -3,7 +3,7 @@
 // an implementation's test folder, and record what was copied. Tags up to
 // v1.2.0 kept them in examples/fixtures/; the tool reads either layout.
 //
-//   node tools/sync-fixtures.mjs <target-dir> [--ref v1.2.0]
+//   node tools/sync-fixtures.mjs <target-dir> [--ref v1.2.1]
 //   node tools/sync-fixtures.mjs <target-dir> --working-tree
 //   node tools/sync-fixtures.mjs <target-dir> --check
 //
@@ -89,7 +89,7 @@ if (workingTree) {
   read = (name) => readFileSync(join(specRoot, dir, name));
 } else {
   useRef = ref ?? 'HEAD';
-  if (!ref) console.warn('No --ref given; using HEAD. Pin implementations to a released tag (e.g. --ref v1.2.0).');
+  if (!ref) console.warn('No --ref given; using HEAD. Pin implementations to a released tag (e.g. --ref v1.2.1).');
   commit = git('rev-parse', `${useRef}^{commit}`).toString().trim();
   const listAt = (dir) =>
     git('ls-tree', '-r', '--name-only', commit, `${dir}/`)

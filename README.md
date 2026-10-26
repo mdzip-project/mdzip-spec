@@ -2,7 +2,7 @@
 
 Specification for the **MDZip** (`.mdz`) file format.
 
-Current release: `v1.2.0` (dated `2026-10-13`) — see [CHANGELOG.md](CHANGELOG.md).
+Current release: `v1.2.1` (dated `2026-10-25`; same format as 1.2.0) — see [CHANGELOG.md](CHANGELOG.md).
 
 This repository defines the `.mdz` file format specification; it does not provide an editor, viewer, or reference implementation.
 

@@ -28,3 +28,8 @@ Thanks for helping improve the MDZip (`.mdz`) specification.
 - Breaking format changes require a major version bump.
 - Backward-compatible additions/clarifications require a minor bump.
 - Editorial fixes require a patch bump.
+- Changes that leave conformance unchanged also get a patch release: new or
+  corrected fixtures, tools, examples and non-normative sections. Implementations
+  pin fixtures to a tag, so they need a release to pick these up. A patch
+  release doesn't change what conforming archives or implementations look like;
+  producers may keep writing the earlier `spec.version` of the same minor.
