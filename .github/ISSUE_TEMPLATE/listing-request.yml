@@ -54,11 +54,17 @@ body:
       placeholder: e.g. 1.3.2
     validations:
       required: true
-  - type: input
+  - type: dropdown
     id: spec-version
     attributes:
       label: Specification version tested against
-      placeholder: e.g. 1.2.0
+      description: 1.2.1 and 1.2.0 describe the same format; pick the one you checked against.
+      # Add each new release at the top when it's tagged (CONTRIBUTING.md, Versioning Policy).
+      options:
+        - 1.2.1
+        - 1.2.0
+        - 1.1.0
+        - Other (say which in Support details)
     validations:
       required: true
   - type: checkboxes
@@ -132,4 +138,28 @@ body:
     id: other-listings
     attributes:
       label: Where else is your app listed? (optional)
-      description: For example AlternativeTo, the Mac App Store or Product Hunt. We can add your app to lists of apps that support MDZip there.
+      description: >-
+        Paste the link after each place your app is listed. Not on some of them yet?
+        They're good places for people to find it:
+        [AlternativeTo](https://alternativeto.net/),
+        [Product Hunt](https://www.producthunt.com/),
+        [Microsoft Store](https://apps.microsoft.com/),
+        [Homebrew](https://brew.sh/),
+        [WinGet](https://learn.microsoft.com/windows/package-manager/),
+        [Chocolatey](https://community.chocolatey.org/),
+        [Flathub](https://flathub.org/),
+        [Snapcraft](https://snapcraft.io/) and
+        [awesome-markdown-editors](https://github.com/mundimark/awesome-markdown-editors).
+        On some, such as AlternativeTo, we can add your app to the list of apps that support MDZip.
+      value: |
+        AlternativeTo:
+        Product Hunt:
+        Mac App Store:
+        Microsoft Store:
+        Homebrew:
+        WinGet:
+        Chocolatey:
+        Flathub:
+        Snapcraft:
+        awesome-markdown-editors:
+        Other:
