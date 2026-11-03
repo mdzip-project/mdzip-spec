@@ -274,8 +274,16 @@ which version of the specification you checked against. Known gaps are fine to
 mention; the listing can say what's supported.
 
 To ask for a listing,
-[open an issue](https://github.com/mdzip-project/mdzip-spec/issues) with the
-app's name, link, roles and the specification version you tested.
+[open a listing request](https://github.com/mdzip-project/mdzip-spec/issues/new?template=listing-request.yml).
+The form asks for the app's name and link, the versions you tested, its roles
+and platforms, how you validated it and any known gaps. If you already have a
+support matrix, you can paste it in.
+
+The listing request is your public statement of what your app supports, and
+the listing links to it, so please post it yourself rather than sending it
+by email. Questions about it are asked on the issue, where you and later
+implementers can see the answers. If you'd rather not use GitHub, publish
+the same information on your own site and email the link instead.
 
 ## 7. Questions and feedback
 

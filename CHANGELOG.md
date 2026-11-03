@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Listing request issue form (`.github/ISSUE_TEMPLATE/listing-request.yml`) for apps that want to be listed on mdzip.org: app and versions tested, roles, platforms, optional features, support details, validation and known gaps. No change to the format.
+
+### Changed
+
+- `examples/implementers.md` section 6: listing requests go through the new issue form, and the developer posts the statement publicly themselves (an issue, or a page on their own site as a fallback).
+
 ## [1.2.1] - 2026-10-25
 
 No change to the format or to conformance: archives and implementations that conform to 1.2.0 conform to 1.2.1, and producers may keep writing `spec.version` `1.2.0`. This release adds fixtures, examples and tools, and moves files.

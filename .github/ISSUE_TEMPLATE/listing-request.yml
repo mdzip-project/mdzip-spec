@@ -1,0 +1,97 @@
+name: Listing request
+description: Ask for your app or tool to be listed on mdzip.org as supporting MDZip (.mdz) files.
+title: "Listing request: <app name>"
+labels: ["listing"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for adding MDZip support! This issue is your public statement of what your app supports. It's linked from your listing on [mdzip.org](https://mdzip.org/works-with.html), so please write it yourself.
+
+        Before you post, go through the [conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md): the checklist in section 2 and the tests in section 3. Conformance is self-assessed. Known gaps are fine; the listing will say what's supported.
+
+        If you already have a support matrix, you can paste it into **Support details** and fill in the short fields above it.
+  - type: input
+    id: app
+    attributes:
+      label: App name
+      placeholder: e.g. LoveMarkDown
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Product or download page
+      description: A public page where people can get the app.
+      placeholder: https://
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version tested
+      placeholder: e.g. 1.3.2
+    validations:
+      required: true
+  - type: input
+    id: spec-version
+    attributes:
+      label: Specification version tested against
+      placeholder: e.g. 1.2.0
+    validations:
+      required: true
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms where this support has shipped
+      description: Only list platforms with a released version. Mention planned ones under Known gaps.
+      options:
+        - label: Windows
+        - label: macOS
+        - label: Linux
+        - label: iOS / iPadOS
+        - label: Android
+        - label: Web
+  - type: checkboxes
+    id: roles
+    attributes:
+      label: Roles
+      description: See section 1 of the conformance guide.
+      options:
+        - label: Opens `.mdz` files (consumer)
+        - label: Creates new `.mdz` files (producer, creation)
+        - label: Saves changes to existing `.mdz` files (producer, modification)
+        - label: Shows Markdown as HTML (rendering consumer)
+  - type: checkboxes
+    id: optional
+    attributes:
+      label: Optional features
+      options:
+        - label: 'Project mode (`"mode": "project"`), read-only'
+        - label: 'Project mode, editing'
+        - label: Links outside the archive (`../Notes.md`)
+        - label: Links into another archive (`Other.mdz/page.md`)
+  - type: textarea
+    id: details
+    attributes:
+      label: Support details
+      description: How your app handles each required item for its roles, or paste your support matrix.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: How you validated it
+      description: Which files you ran through `mdz validate` (and which version of `mdz`), including `keep-on-save.mdz` after an edit and save, plus any fixture tests.
+    validations:
+      required: true
+  - type: textarea
+    id: gaps
+    attributes:
+      label: Known gaps
+      description: Required or recommended items you don't meet yet, and planned platforms or features.
+  - type: textarea
+    id: other-formats
+    attributes:
+      label: Other `.mdz` formats
+      description: If your app also reads or writes other formats that use the `.mdz` extension, how it tells them apart, and whether it offers encrypted output (which is not MDZip). See section 5 of the guide.
