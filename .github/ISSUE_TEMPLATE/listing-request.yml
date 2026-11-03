@@ -48,6 +48,12 @@ body:
         - Free with paid features
         - Paid
   - type: input
+    id: source
+    attributes:
+      label: Source code (optional)
+      description: If the app is open source, a link to its repository (GitHub, GitLab, Codeberg...). On GitHub, adding the `mdzip` topic to your repository helps people find apps that support MDZip.
+      placeholder: https://
+  - type: input
     id: app-version
     attributes:
       label: App version tested
