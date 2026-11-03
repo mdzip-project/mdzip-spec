@@ -277,7 +277,9 @@ To ask for a listing,
 [open a listing request](https://github.com/mdzip-project/mdzip-spec/issues/new?template=listing-request.yml).
 The form asks for the app's name and link, the versions you tested, its roles
 and platforms, how you validated it and any known gaps. If you already have a
-support matrix, you can paste it in.
+support matrix, you can paste it in. Optional fields cover what the listing
+shows (a one-sentence description and the price and license) and the news post
+announcing it (your logo, and permission to use it).
 
 The listing request is your public statement of what your app supports, and
 the listing links to it, so please post it yourself rather than sending it

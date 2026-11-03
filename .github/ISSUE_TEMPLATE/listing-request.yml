@@ -27,6 +27,27 @@ body:
     validations:
       required: true
   - type: input
+    id: developer
+    attributes:
+      label: Developer name to show
+      description: Your name or your company's, as you'd like it in the listing.
+      placeholder: e.g. NgSense
+  - type: input
+    id: description
+    attributes:
+      label: One-sentence description
+      description: What the app is, for someone who hasn't heard of it. We may edit it lightly to match the site's style.
+      placeholder: e.g. A Markdown editor for Mac that keeps your writing local.
+  - type: dropdown
+    id: license
+    attributes:
+      label: Price and license
+      options:
+        - Free
+        - Free and open source
+        - Free with paid features
+        - Paid
+  - type: input
     id: app-version
     attributes:
       label: App version tested
@@ -94,4 +115,21 @@ body:
     id: other-formats
     attributes:
       label: Other `.mdz` formats
-      description: If your app also reads or writes other formats that use the `.mdz` extension, how it tells them apart, and whether it offers encrypted output (which is not MDZip). See section 5 of the guide.
+      description: If your app also reads or writes other formats that use the `.mdz` extension, how it tells them apart, and whether it offers encrypted output (which is not MDZip). See section 5 of the guide. Please also tell us what your save dialog or menu calls the MDZip option, and which format new documents use by default; your listing tells readers how to save a file other MDZip apps can open.
+  - type: textarea
+    id: logo
+    attributes:
+      label: Logo (optional)
+      description: Drag in an SVG, or a PNG at least 256 px across. We use it in the banner of the news post announcing your listing.
+  - type: checkboxes
+    id: permissions
+    attributes:
+      label: Permissions (optional)
+      options:
+        - label: You may use this logo in the listing and in posts announcing it.
+        - label: You may announce the listing on the MDZip news page.
+  - type: textarea
+    id: other-listings
+    attributes:
+      label: Where else is your app listed? (optional)
+      description: For example AlternativeTo, the Mac App Store or Product Hunt. We can add your app to lists of apps that support MDZip there.

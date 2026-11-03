@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
-- Listing request issue form (`.github/ISSUE_TEMPLATE/listing-request.yml`) for apps that want to be listed on mdzip.org: app and versions tested, roles, platforms, optional features, support details, validation and known gaps. No change to the format.
+- Listing request issue form (`.github/ISSUE_TEMPLATE/listing-request.yml`) for apps that want to be listed on mdzip.org: app and versions tested, roles, platforms, optional features, support details, validation and known gaps, plus optional fields for the developer name to show, a one-sentence description, price and license, a logo with permission to use it, permission to announce the listing, and other sites where the app is listed. No change to the format.
 
 ### Changed
 
