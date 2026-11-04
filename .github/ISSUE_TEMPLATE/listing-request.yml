@@ -53,6 +53,20 @@ body:
       label: Source code (optional)
       description: If the app is open source, a link to its repository (GitHub, GitLab, Codeberg...). On GitHub, adding the `mdzip` topic to your repository helps people find apps that support MDZip.
       placeholder: https://
+  - type: dropdown
+    id: core
+    attributes:
+      label: Built with an MDZip core library? (optional)
+      description: Either is fine; many apps have their own implementation. If you use a core library, please give its version in Support details. If a core library fix affects your app, we can let you know.
+      # Keep in step with CORE_LIBRARIES in mdzip.org/scripts/lib/ecosystem.mjs.
+      options:
+        - No, our own implementation
+        - "@mdzip/core-js (JavaScript)"
+        - mdzip-core (Python)
+        - MDZip.Core (.NET)
+        - mdzip-core (Rust)
+        - mdzip-core-lua (Lua)
+        - Other (say which in Support details)
   - type: input
     id: app-version
     attributes:
