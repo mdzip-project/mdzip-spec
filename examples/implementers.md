@@ -267,7 +267,7 @@ with `.mdz` files. To be listed, an app needs:
 1. A public download or product page.
 2. A statement of which roles it supports (open, create, save changes), and which optional features (project mode, links outside the archive).
 3. Conformance with the specification for those roles: the required items in [section 2](#2-required-recommended-and-optional) for each role it plays.
-4. Archives it creates or saves that pass `mdz validate` with no errors, including `keep-on-save.mdz` after an edit and save.
+4. Archives it creates or saves that pass `mdz validate` with no errors, including the sample [`keep-on-save.mdz`](samples/keep-on-save.mdz) after you edit and save it in your app.
 
 Conformance is self-assessed: go through the checklist and tests above and say
 which version of the specification you checked against. Known gaps are fine to
@@ -276,8 +276,8 @@ mention; the listing can say what's supported.
 To ask for a listing,
 [open a listing request](https://github.com/mdzip-project/mdzip-spec/issues/new?template=listing-request.yml).
 The form asks for the app's name and link, the versions you tested, its roles
-and platforms, how you validated it and any known gaps. If you already have a
-support matrix, you can paste it in. Optional fields cover what the listing
+and platforms, how you validated it and any known gaps. If you've already written
+up what your app supports, for example as a table, you can paste it in. Optional fields cover what the listing
 shows (a one-sentence description and the price and license) and the news post
 announcing it (your logo, and permission to use it).
 

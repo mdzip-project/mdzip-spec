@@ -10,7 +10,7 @@ body:
 
         Before you post, go through the [conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md): the checklist in section 2 and the tests in section 3. Conformance is self-assessed. Known gaps are fine; the listing will say what's supported.
 
-        If you already have a support matrix, you can paste it into **Support details** and fill in the short fields above it.
+        If you've already written up what your app supports, for example as a table, you can paste it into **Support details** and fill in the short fields above it.
   - type: input
     id: app
     attributes:
@@ -121,14 +121,14 @@ body:
     id: details
     attributes:
       label: Support details
-      description: How your app handles each required item for its roles, or paste your support matrix.
+      description: 'Go through the required items in [section 2 of the conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#2-required-recommended-and-optional) for each role you ticked above, and say whether your app meets each one and how. A short list or table is fine, e.g. "Opens archives without manifest.json: yes".'
     validations:
       required: true
   - type: textarea
     id: validation
     attributes:
       label: How you validated it
-      description: Which files you ran through `mdz validate` (and which version of `mdz`), including `keep-on-save.mdz` after an edit and save, plus any fixture tests.
+      description: 'Which files your app wrote that you checked with [`mdz validate`](https://github.com/mdzip-project/mdzip-cli#installation), and which version of `mdz`. For example: a new document, one with images, and our sample [`keep-on-save.mdz`](https://github.com/mdzip-project/mdzip-spec/raw/main/examples/samples/keep-on-save.mdz) after you opened, edited and saved it in your app. Also list any [conformance fixtures](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#step-3-run-the-conformance-fixtures) you ran.'
     validations:
       required: true
   - type: textarea
