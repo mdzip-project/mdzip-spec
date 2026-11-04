@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for adding MDZip support! This issue is your public statement of what your app supports. It's linked from your listing on [mdzip.org](https://mdzip.org/works-with.html), so please write it yourself.
+        Thanks for adding MDZip support! This issue is your public statement of what your app supports. Your listing on [mdzip.org](https://mdzip.org/works-with.html) will link to it, so please write it yourself.
 
         Before you post, go through the [conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md): the checklist in section 2 and the tests in section 3. Conformance is self-assessed. Known gaps are fine; the listing will say what's supported.
 
@@ -78,12 +78,11 @@ body:
     id: spec-version
     attributes:
       label: Specification version tested against
-      description: 1.2.1 and 1.2.0 describe the same format; pick the one you checked against.
-      # Add each new release at the top when it's tagged (CONTRIBUTING.md, Versioning Policy).
+      # Minor versions only (1.2.x): patch releases don't change the format. Add each new
+      # minor or major version at the top when it's tagged (CONTRIBUTING.md).
       options:
-        - 1.2.1
-        - 1.2.0
-        - 1.1.0
+        - 1.2.x
+        - 1.1.x
         - Other (say which in Support details)
     validations:
       required: true

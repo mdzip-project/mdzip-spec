@@ -33,5 +33,8 @@ Thanks for helping improve the MDZip (`.mdz`) specification.
   pin fixtures to a tag, so they need a release to pick these up. A patch
   release doesn't change what conforming archives or implementations look like;
   producers may keep writing the earlier `spec.version` of the same minor.
-- When you tag a release, add its version to the top of the "Specification
-  version tested against" list in `.github/ISSUE_TEMPLATE/listing-request.yml`.
+- When you tag a new minor or major release, add it to the top of the
+  "Specification version tested against" list in
+  `.github/ISSUE_TEMPLATE/listing-request.yml`. It lists minor versions only
+  (`1.2.x`), since patch releases don't change the format, so a patch release
+  needs no change.
