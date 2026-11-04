@@ -121,26 +121,67 @@ body:
     id: details
     attributes:
       label: Support details
-      description: 'Go through the required items in [section 2 of the conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#2-required-recommended-and-optional) for each role you ticked above, and say whether your app meets each one and how. A short list or table is fine, e.g. "Opens archives without manifest.json: yes".'
+      description: 'After each item, write yes, no or partly, with a note where it helps. Delete the sections for roles your app doesn''t have. Each item is explained in [section 2 of the conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#2-required-recommended-and-optional). Already written this up another way, for example as a table? Replace the template with it.'
+      value: |
+        **Opening files**
+        - Reads ZIP entries stored or DEFLATE-compressed; rejects other methods instead of showing them empty:
+        - Opens files without `manifest.json`:
+        - Finds the main document (`entryPoint`, then `index.md`, then the only Markdown file):
+        - Reports a bad or missing `entryPoint` instead of silently opening another file:
+        - Ignores manifest fields it doesn't recognize:
+        - Treats a missing `mode` as a document; opens or visibly refuses projects:
+        - Rejects files with a higher major `spec.version`:
+        - Accepts `created` and `modified` as an object or a date string:
+        - Resolves links and images relative to their file, case-sensitively:
+        - Accepts LF and CRLF line endings:
+        - Handles unsafe entry names and symbolic links safely:
+        - Runs no scripts from the file (if it shows HTML):
+
+        **Creating files**
+        - Valid ZIP with the `.mdz` extension, stored or DEFLATE, no encryption or symbolic links:
+        - Writes `manifest.json` with `spec.version` and `entryPoint`:
+        - Sets `"mode": "project"` for a collection of documents:
+        - Writes Markdown and JSON as UTF-8:
+        - Safe entry names (forward slashes, no `..`, no reserved characters, no duplicates):
+        - Sets the UTF-8 flag on non-ASCII names:
+        - Keeps the capitalization of file names:
+
+        **Saving changes**
+        - Keeps every file it doesn't change, byte for byte:
+        - Keeps manifest fields it doesn't recognize:
+        - Keeps the same main document unless the user changes it:
     validations:
       required: true
   - type: textarea
     id: validation
     attributes:
       label: How you validated it
-      description: 'Which files your app wrote that you checked with [`mdz validate`](https://github.com/mdzip-project/mdzip-cli#installation), and which version of `mdz`. For example: a new document, one with images, and our sample [`keep-on-save.mdz`](https://github.com/mdzip-project/mdzip-spec/raw/main/examples/samples/keep-on-save.mdz) after you opened, edited and saved it in your app. Also list any [conformance fixtures](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#step-3-run-the-conformance-fixtures) you ran.'
+      description: 'Run each kind of file your app writes through [`mdz validate`](https://github.com/mdzip-project/mdzip-cli#installation) and note the result: passed, or the errors it reported. For the last line, open our sample [`keep-on-save.mdz`](https://github.com/mdzip-project/mdzip-spec/raw/main/examples/samples/keep-on-save.mdz) in your app, edit it and save it. Delete lines that don''t apply.'
+      value: |
+        `mdz` version:
+        A new document:
+        A document with images:
+        `keep-on-save.mdz` after editing and saving it:
+        Conformance fixtures run (optional, see [step 3](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md#step-3-run-the-conformance-fixtures)):
     validations:
       required: true
   - type: textarea
     id: gaps
     attributes:
-      label: Known gaps
-      description: Required or recommended items you don't meet yet, and planned platforms or features.
+      label: Known gaps (optional)
+      description: Anything above you answered no or partly, and platforms or features you plan to add.
+      placeholder: 'e.g. Links into other archives aren''t supported yet. Windows version planned for 2.0.'
   - type: textarea
     id: other-formats
     attributes:
-      label: Other `.mdz` formats
-      description: If your app also reads or writes other formats that use the `.mdz` extension, how it tells them apart, and whether it offers encrypted output (which is not MDZip). See section 5 of the guide. Please also tell us what your save dialog or menu calls the MDZip option, and which format new documents use by default; your listing tells readers how to save a file other MDZip apps can open.
+      label: Other `.mdz` formats (optional)
+      description: Only if your app also opens or saves other formats that use the `.mdz` extension. Your listing tells readers how to save a file other MDZip apps can open. See section 5 of the [conformance guide](https://github.com/mdzip-project/mdzip-spec/blob/main/examples/implementers.md).
+      placeholder: |
+        Other formats it uses .mdz for:
+        How it tells them apart when opening:
+        Encrypted output, and the extension it uses:
+        What the save dialog or menu calls the MDZip option:
+        The format new documents use by default:
   - type: textarea
     id: logo
     attributes:
