@@ -1,0 +1,54 @@
+title: "Test report: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing! Follow one of the [test scripts](https://mdzip.org/testing.html), then fill this in. One report per script you ran.
+
+        A report where everything passed is useful too. If a step failed, we'll turn it into a bug report for that app and reply here.
+  - type: dropdown
+    id: script
+    attributes:
+      label: Test script
+      options:
+        - MDZip Studio on Mac
+        - Other (say which in the notes)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: In Studio, it's in About MDZip Studio.
+      placeholder: e.g. 1.7.0
+    validations:
+      required: true
+  - type: input
+    id: computer
+    attributes:
+      label: Computer and operating system
+      description: The model, the chip (Apple Silicon or Intel), and the OS version.
+      placeholder: e.g. MacBook Air M2, macOS 15.1 / iMac 2019 Intel, macOS 13.6
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Every step passed
+        - Some steps didn't match
+        - I couldn't finish the script
+    validations:
+      required: true
+  - type: textarea
+    id: problems
+    attributes:
+      label: What didn't match
+      description: For each step that went differently, give the step number, what you expected and what happened. Paste or drag in screenshots.
+      placeholder: "Step 7: the document opened, but the picture was missing."
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Steps that were confusing, things you liked, or what you'd test next.
