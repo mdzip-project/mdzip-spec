@@ -12,6 +12,8 @@ body:
       label: Test script
       options:
         - MDZip Studio on Mac
+        - MarkItDown converter
+        - Pandoc converter
         - Other (say which in the notes)
     validations:
       required: true
@@ -19,7 +21,7 @@ body:
     id: version
     attributes:
       label: App version
-      description: In Studio, it's in About MDZip Studio.
+      description: In Studio, it's in About MDZip Studio. For the converters, give the version that `pip show markitdown-mdzip` or `pandoc --version` prints.
       placeholder: e.g. 1.7.0
     validations:
       required: true
