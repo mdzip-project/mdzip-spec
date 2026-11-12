@@ -47,6 +47,8 @@ body:
         - Free and open source
         - Free with paid features
         - Paid
+    validations:
+      required: true
   - type: input
     id: source
     attributes:
@@ -66,6 +68,8 @@ body:
         - MDZip.Core (.NET)
         - mdzip-core (Rust)
         - mdzip-core-lua (Lua)
+        - mdzip-core-swift (Swift)
+        - org.mdzip:mdzip-core (Kotlin and Java)
         - Other (say which in Support details)
   - type: input
     id: app-version
