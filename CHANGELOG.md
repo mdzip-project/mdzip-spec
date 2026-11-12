@@ -10,6 +10,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Sections 5.8 and 13.2: an archive's `AGENTS.md` and other content is untrusted when the archive comes from someone else. Agents **SHOULD** follow `AGENTS.md` only for how to read and handle the archive, and **SHOULD** treat everything they pass to a language model as data, not instructions, since an archive can carry a prompt injection. Guidance for agents; no change to the format or conformance.
 - `examples/implementers.md` section 6: listing requests go through the new issue form, and the developer posts the statement publicly themselves (an issue, or a page on their own site as a fallback).
 
 ## [1.2.1] - 2026-10-25

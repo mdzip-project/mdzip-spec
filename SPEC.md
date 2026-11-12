@@ -373,6 +373,8 @@ When present, `AGENTS.md` **SHOULD** briefly include:
 
 `AGENTS.md` is advisory: nothing in it overrides `manifest.json`, which is authoritative when present, or the rules of this specification. Like `README.md`, `AGENTS.md` does not affect conformance logic, and it is a support file for entry point discovery ([Section 5.5](#55-entry-point-discovery)).
 
+`AGENTS.md` is written by whoever made the archive, so in an archive from someone else it is untrusted content, like the documents beside it. An agent **SHOULD** follow it only for how to read and handle the archive, and **SHOULD NOT** follow instructions in it that go beyond that, such as running commands, fetching URLs, changing other files, or ignoring the user's own instructions ([Section 13.2](#132-content-handling)).
+
 A reusable sample is available at [`examples/templates/AGENTS.sample.md`](examples/templates/AGENTS.sample.md).
 
 ---
@@ -853,6 +855,7 @@ Conforming consumers and producers should treat `.mdz` content as potentially un
 - Consumers **SHOULD** warn before opening external URLs found in document links.
 - Consumers **SHOULD** let users turn off automatic loading of external resources such as remote images, which reveals to their servers that the document was opened ([Section 9.2](#92-external-links)).
 - Consumers **SHOULD** apply implementation-specific size/time limits while parsing large Markdown or metadata files.
+- AI agents and tools that pass archive content to a language model **SHOULD** treat all of it as data, not instructions, including `AGENTS.md` ([Section 5.8](#58-agent-facing-agentsmd-optional)), `README.md` and the documents themselves. An archive from someone else can carry a prompt injection: text written to make an agent run commands, send data elsewhere or change files the user didn't ask it to.
 
 ### 13.3 Producer Guidance
 
